@@ -12,5 +12,4 @@ var mock1 = {
 		value: 52
 
 	}
-
 }
