@@ -1,0 +1,4 @@
+Sara: parse latex to tree-form data stucture
+Edwin: run throuh the data tree and produce SVG
+Colm: animations of SVG in JavaScript
+Pavel: .... user interface for animation...
