@@ -57,7 +57,7 @@ number "number"
   }
 
 variable "variable" 
-  = v:LITERAL {return {type:"variable", code:v.sym, name:v.name}}
+  = v:LITERAL {return {id:getid(), type:"variable", code:v.sym, name:v.name}}
 
 value "value"
   = n:number SEP* {return n;}
