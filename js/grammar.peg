@@ -7,18 +7,19 @@ value "value"
 
 
 binop "binop"
-  = "\plus"sep* {return 'plus'}
-  / "\times"sep* {return "mult"}
-  / "\cdot"sep* {return "mult"}
+  = "\plus"sep* {return {name:'plus', code:"+"}}
+  / "\times"sep* {return {name:"mult", code:"*"}}
+  / "\cdot"sep* {return {name:"mult", code:"*"}}
 
 exp "exp"
   = v:value t:binop n:exp { 
-   return { type:'op', op:t, left:v, right:n};
+   return { type:'op', op:t.name, code:t.code, left:v, right:n};
   }
   / v:value {
   	return v;
   }
 
+variable "variable"
 number "number"
   = v:decimal { 
    return { type:'number', value:v };
