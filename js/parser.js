@@ -25,7 +25,6 @@ Parser = function(){
 		this.parser = null;
 		//this.parser = this.peg.buildParser(this.grammar);
 		that.grammar = jQuery.get('js/grammar.peg', function(data) {
-			console.log(data);
 		    that.grammar = data;
 		    that.parser = that.peg.buildParser(that.grammar);
 		});
@@ -35,20 +34,7 @@ Parser = function(){
 
 	}
 	this.gen = function(data){
-		var type = data.type;
-		if(type == 'op'){
-			var op = this.op_map[data.op];
-			var res_left = this.gen(data.left);
-			var res_right = this.gen(data.right);
-			return res_left + op + res_right;
-
-		}
-		else if(type == "symbol"){
-			return data.value;
-		}
-		else if(type == "number"){
-			return data.value;
-		}
+		return this.parser.gee
 	}
 	this.init();
 
