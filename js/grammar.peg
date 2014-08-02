@@ -1,0 +1,12 @@
+{
+start
+	= integer
+
+integer "integer"
+	= digits:[0-9]+ { 
+		var value = parseInt(digits.join(""), 10); 
+		return {
+			type: "number",
+			value: value
+		}
+}
