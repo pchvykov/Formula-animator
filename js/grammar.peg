@@ -55,14 +55,14 @@ SEP "SEP"
   = [ \t\r\n]
 
 MULT "MULT"
-= "\cdot"SEP* {return "*"} 
-/ "\times"SEP* {return "x"}
+= "\\cdot"SEP* {return "*"} 
+/ "\\times"SEP* {return "x"}
 
 DIV "DIV"
-= "\frac"SEP* {return ""}
+= "\\frac"SEP* {return ""}
 
 PLUS "PLUS"
-= "\plus"SEP* {return "+"}
+= "\\plus"SEP* {return "+"}
 
 EXP "EXP"
 = "^"SEP* {return "^"}
