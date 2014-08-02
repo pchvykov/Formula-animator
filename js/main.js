@@ -19,18 +19,24 @@ var BindActionHandlerToSVG = function(sv, data){
 	return a;
 }
 
-
+var SVG = null;
 $( document ).ready(function() {
     console.log( "ready!" );
 
-    
+    $('#formula_render').svg({onLoad: function(svg){
+    	SVG = svg;
+    }}); 
+
     $("#formula_latex").change(function(){
     	var data = $("#formula_latex").val().substr();
     	var form = parser.parse(data);
     	var form_str = form.toString();
     	$("#formula_latex_debug").html(form_str);
 
+    	scan_tree(form, SVG);
+    	/*
     	var srndr=$("#formula_render")
+    	
     	var actionHandler = BindActionHandlerToSVG(srndr, form);
     	//
     	actionHandler.add("click", "print", function(args){
@@ -40,6 +46,7 @@ $( document ).ready(function() {
     		$("#"+selem.id).attr("fill","yellow");
     		console.log(selem);
     	})
+		*/
     })
 
    
