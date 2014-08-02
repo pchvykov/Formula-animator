@@ -22,10 +22,8 @@ var BindActionHandlerToSVG = function(sv, data){
 var SVG = null;
 $( document ).ready(function() {
     console.log( "ready!" );
-
-    $('#formula_render').svg({onLoad: function(svg){
-    	SVG = svg;
-    }}); 
+    //http://zreference.com/raphael-animation-along-a-path/
+    SVG = new Raphael($("#formula_container")[0],screen.width, screen.height)
 
     $("#formula_latex").change(function(){
     	var data = $("#formula_latex").val().substr();
@@ -33,7 +31,7 @@ $( document ).ready(function() {
     	var form_str = form.toString();
     	$("#formula_latex_debug").html(form_str);
 
-    	scan_tree(form, SVG);
+    	scan_tree(form, paper);
     	/*
     	var srndr=$("#formula_render")
     	
