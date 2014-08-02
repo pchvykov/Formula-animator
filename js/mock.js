@@ -1,3 +1,4 @@
+// <text x="250" y="50" dy="-10">B &#948 </text> <!-- This positions letter B and greek letter small delta-->
 
 
 var mock1 = {
