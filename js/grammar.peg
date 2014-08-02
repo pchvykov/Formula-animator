@@ -1,30 +1,38 @@
+{
+  var CURR_ID = 0;
+  function getid() {
+    var id = CURR_ID;
+    CURR_ID+=1;
+    return id;
+  }
+}
+
 start
   = exp
 
-
 p1binop "p1binop" 
-  = OPAREN e:exp CPAREN {return {type:'op', op:'paren', exp:e}}
+  = OPAREN e:exp CPAREN {return {id:getid(),type:'op', op:'paren', exp:e}}
   / v:value {return v}
 
 p2binop "p2binop" 
-  = base:p1binop code:EXP exp:p2binop {return {type:'op', op:'exp', code:code, exp:exp, base:base}}
+  = base:p1binop code:EXP exp:p2binop {return {id:getid(),type:'op', op:'exp', code:code, exp:exp, base:base}}
   / v:p1binop {return v}
 
 p3binop "p3binop" 
   = v:p2binop code:MULT n:p3binop SEP*
-  	{return {type:'op', op:"mult", code:code, left:v, right:n}}
+  	{return {id:getid(),type:'op', op:"mult", code:code, left:v, right:n}}
 
   / code:DIV OCBRACE v:p2binop CCBRACE SEP* OCBRACE n:p3binop CCBRACE
-  	{return {type:'op', op:"div", code:code, top:v, bottom:n}}
+  	{return {id:getid(),type:'op', op:"div", code:code, top:v, bottom:n}}
 
   / v:p2binop SEP* 
   	{return v}
 
 p4binop "p4binop" //add, sub
   = v:p3binop code:PLUS n:p4binop 
-  	{return {type:'op', op:'plus', code:code, left:v, right:n}}
+  	{return {id:getid(),type:'op', op:'plus', code:code, left:v, right:n}}
   / v:p3binop code:MINUS n:p4binop 
-  	{return {type:'op', op:'minus', code:code, left:v, right:n}}
+  	{return {id:getid(),type:'op', op:'minus', code:code, left:v, right:n}}
   / v:p3binop SEP* {return v;}
 
 binop "binop"
@@ -37,7 +45,7 @@ exp "exp"
 
 number "number"
   = v:DECIMAL { 
-   return { type:'number', value:v };
+   return { id:getid(), type:'number', value:v };
   }
 
 value "value"
