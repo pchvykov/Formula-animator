@@ -30,11 +30,8 @@ Parser = function(){
 		});
 	}
 	this.parse = function(text){
-		return this.parser.parse(text);
+		return new Formula(this.parser.parse(text));
 
-	}
-	this.gen = function(data){
-		return this.parser.gee
 	}
 	this.init();
 
