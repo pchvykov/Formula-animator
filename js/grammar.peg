@@ -23,7 +23,8 @@ p3binop "p3binop"
 p4binop "p4binop" //add, sub
   = v:p3binop code:PLUS n:p4binop 
   	{return {type:'op', op:'plus', code:code, left:v, right:n}}
-
+  / v:p3binop code:MINUS n:p4binop 
+  	{return {type:'op', op:'minus', code:code, left:v, right:n}}
   / v:p3binop SEP* {return v;}
 
 binop "binop"
@@ -63,10 +64,13 @@ DIV "DIV"
 
 PLUS "PLUS"
 = "\\plus"SEP* {return "+"}
+/ "+"SEP* {return "+"}
+
+MINUS "MINUS"
+= "-"SEP* {return "-"}
 
 EXP "EXP"
 = "^"SEP* {return "^"}
-
 
 OCBRACE "OCBRACE" 
 	= "{"SEP*  {}
@@ -76,5 +80,6 @@ CCBRACE "CCBRACE"
 
 OPAREN "OPAREN" 
 	= "("SEP* {}
+
 CPAREN "CPAREN" 
 	= ")"SEP* {}
