@@ -19,7 +19,7 @@ exp "exp"
   	return v;
   }
 
-variable "variable"
+
 number "number"
   = v:decimal { 
    return { type:'number', value:v };
