@@ -31,7 +31,7 @@ $( document ).ready(function() {
     	var form_str = form.toString();
     	$("#formula_latex_debug").html(form_str);
 
-    	scan_tree(form, paper);
+    	scan_tree(form, SVG);
     	/*
     	var srndr=$("#formula_render")
     	
