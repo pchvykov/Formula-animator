@@ -1,5 +1,10 @@
 {
   var CURR_ID = 0;
+  var SYMBOL_TABLE = {
+  	"gamma": "&#947;",
+  	"Gamma": "&#915;"
+
+  }
   function getid() {
     var id = CURR_ID;
     CURR_ID+=1;
@@ -48,8 +53,12 @@ number "number"
    return { id:getid(), type:'number', value:v };
   }
 
+variable "variable" 
+  = v:LITERAL {return {type:"variable", code:v.sym, name:v.name}}
+
 value "value"
   = n:number SEP* {return n;}
+  / v:variable SEP* {return v;}
 
 
 DECIMAL "DECIMAL"
@@ -60,11 +69,25 @@ DECIMAL "DECIMAL"
   	}
   / digits:[0-9]+ {return parseInt(digits.join(""),10)}
 
+LITERAL "LITERAL"
+  = l:[A-Za-z]+ 
+	  {
+	  	var name = l.join("");
+	  	var sym = name;
+	  	return {name:name, sym:sym}
+	  }
+  / "\\"l:[A-Za-z]+ 
+	  {
+	  	var name = l.join("");
+	  	var sym = SYMBOL_TABLE[name];
+	  	return {name:name, sym:sym}
+	  }
+
 SEP "SEP"
   = [ \t\r\n]
 
 MULT "MULT"
-= "\\cdot"SEP* {return "*"} 
+= "\\cdot"SEP* {return "&#8727;"} 
 / "\\times"SEP* {return "x"}
 
 DIV "DIV"
@@ -78,7 +101,7 @@ MINUS "MINUS"
 = "-"SEP* {return "-"}
 
 EXP "EXP"
-= "^"SEP* {return "^"}
+= "^"SEP* {return ""}
 
 OCBRACE "OCBRACE" 
 	= "{"SEP*  {}
