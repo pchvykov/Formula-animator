@@ -22,13 +22,16 @@ Parser = function(){
 	this.init = function(){
 		var that = this;
 		this.peg = PEG;
+		this.parser = null;
 		//this.parser = this.peg.buildParser(this.grammar);
 		that.grammar = jQuery.get('js/grammar.peg', function(data) {
-		    alert(data);
+			console.log(data);
+		    that.grammar = data;
+		    that.parser = that.peg.buildParser(that.grammar);
 		});
 	}
 	this.parse = function(text){
-		this.parser.parse(text);
+		return this.parser.parse(text);
 
 	}
 	this.gen = function(data){

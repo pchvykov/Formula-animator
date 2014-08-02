@@ -1,12 +1,36 @@
-{
 start
-	= integer
+  = exp
 
-integer "integer"
-	= digits:[0-9]+ { 
-		var value = parseInt(digits.join(""), 10); 
-		return {
-			type: "number",
-			value: value
-		}
-}
+
+value "value"
+  = n:number sep* {return n;}
+
+
+binop "binop"
+  = "\plus"sep* {return 'plus'}
+  / "\times"sep* {return "mult"}
+  / "\cdot"sep* {return "mult"}
+
+exp "exp"
+  = v:value t:binop n:exp { 
+   return { type:'op', op:t, left:v, right:n};
+  }
+  / v:value {
+  	return v;
+  }
+
+number "number"
+  = v:decimal { 
+   return { type:'number', value:v };
+  }
+
+decimal "decimal"
+  = mant:[0-9]+"."dec:[0-9]+ {
+	  	var v= mant.join("")+"."+dec.join("");
+	  	console.log(v);
+	  	return parseFloat(v,10)
+  	}
+  / digits:[0-9]+ {return parseInt(digits.join(""),10)}
+
+sep
+  = [ \t\r\n]
