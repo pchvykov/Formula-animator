@@ -34,6 +34,9 @@ p3binop "p3binop"
   / code:DIV OCBRACE v:p2binop CCBRACE SEP* OCBRACE n:p3binop CCBRACE
   	{return {id:getid(),type:'op', op:"div", code:code, top:v, bottom:n}}
 
+  /  v:p2binop code:MDIV n:p3binop
+    {return {id:getid(),type:'op', op:"div", code:code, top:v, bottom:n}}
+
   / v:p2binop SEP* 
   	{return v}
 
@@ -96,9 +99,14 @@ SEP "SEP"
 MULT "MULT"
 = "\\cdot"SEP* {return "&#8727;"} 
 / "\\times"SEP* {return "x"}
+/ "*"SEP* {return "*"}
 
 DIV "DIV"
 = "\\frac"SEP* {return ""}
+
+MDIV "MDIV"
+= "/"SEP* {return "/"}
+
 
 PLUS "PLUS"
 = "\\plus"SEP* {return "+"}
