@@ -33,7 +33,10 @@ $( document ).ready(function() {
     	var form_str = form.toString();
     	$("#formula_latex_debug").html(form_str);
 
-    	scan_tree(form.data, SVG);
+    	//scan_tree(form.data, SVG);
+        var v = scan_tree_v2(form.data, SVG);
+        console.log(v)
+
     	/*
     	var srndr=$("#formula_render")
     	
