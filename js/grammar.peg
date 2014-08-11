@@ -16,7 +16,8 @@
 }
 
 start
-  = exp
+  = equality
+  /exp
 
 p1binop "p1binop" 
   = OPAREN e:exp CPAREN {return {id:getid(),type:'op', op:'paren', exp:e}}
@@ -47,9 +48,12 @@ binop "binop"
   = n:p4binop {return n;}
 
 exp "exp"
-  = t:binop { 
-   return t;
-  }
+  = t:binop { return t;}
+
+equality "equality"
+  = v:exp code:EQUALS n:exp {return {id:getid(),type:'op', op:'eq', code:code, left:v, right:n}}
+  
+
 
 number "number"
   = v:DECIMAL { 
@@ -105,6 +109,10 @@ MINUS "MINUS"
 
 EXP "EXP"
 = "^"SEP* {return ""}
+
+EQUALS "EQUALS"
+= "="SEP* {return "="}
+
 
 OCBRACE "OCBRACE" 
 	= "{"SEP*  {}
