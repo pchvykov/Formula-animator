@@ -65,7 +65,7 @@ var mock4 = {
 	}
 }
 
-//a + b = c + d
+//a + b = c + d  (propagtes left)
 var mock5 = {
 	id: 16,
 	type: "op",
@@ -109,3 +109,48 @@ var mock5 = {
 	}
 }
 
+
+//a + b = c + d (Centered on equal sign)
+var mock6 = {
+	id: 16,
+	type: "op",
+	op: "equal",
+	code: "=",
+	right: {
+		id: 4,
+		type: "op",
+		op: "plus",
+		code: "+",
+		right:{
+			id: 7,
+			type: "variable",
+			code: "d",
+			name: "d"
+		},
+		left:{
+			id: 8,
+			type: "variable",
+			code: "c",
+			name: "c"
+		}
+	},
+	
+	left: {
+		id: 9,
+		type: "op",
+		op: "plus",
+		code: "+",
+		right:{
+			id: 10,
+			type: "variable",
+			code: "b",
+			name: "b"
+		},
+		left:{
+			id: 11,
+			type: "variable",
+			code: "a",
+			name: "a"
+		}
+	}
+}
