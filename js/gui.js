@@ -8,13 +8,12 @@
 
 // document.onselectstart = function(){ return false; }
 window.onload = function () {
-    holdid = -1; dropid = -1;
-    ox=0; oy=0;
+    holdid = -1; dropid = -1; left = false;
 
-var tree = { "id": 29, "type": "op", "op": "eq", "code": "=", "left": 
-{ "id": 16, "type": "op", "op": "plus", "code": "+", "left": 
-{ "id": 3, "type": "number", "value": 5 }, "right": { "id": 15, "type": "number", "value": 6 } }, 
-"right": { "id": 28, "type": "number", "value": 7 } };
+// var tree = { "id": 29, "type": "op", "op": "eq", "code": "=", "left": 
+// { "id": 16, "type": "op", "op": "plus", "code": "+", "left": 
+// { "id": 3, "type": "number", "value": 5 }, "right": { "id": 15, "type": "number", "value": 6 } }, 
+// "right": { "id": 28, "type": "number", "value": 7 } };
 
 var R = Raphael(0, 0, "100%", "100%");
     s1 = R.text(250, 100, '='),
@@ -22,7 +21,10 @@ var R = Raphael(0, 0, "100%", "100%");
 	s3 = R.text(100, 100, '5'),
 	s4 = R.text(200, 100, '6'),
 	s5 = R.text(300, 100, '7'),
-    s = R.set(s1, R.set(s2, R.set(s3), R.set(s4)), R.set(s5));
+    s = R.set(s1, R.set(s2, R.set(s3), R.set(s4)), R.set(s5)),
+    dropel = s1;
+
+
     s.forEach(function(el) {el.parent = s;});
     s[1].forEach(function(el) {el.parent = s[1];});
     s[2].forEach(function(el) {el.parent = s[2];});
@@ -39,7 +41,7 @@ var R = Raphael(0, 0, "100%", "100%");
     // b = R.circle(320, 100, 50).attr({fill: "hsb(.6, 1, 1)", stroke: "none", opacity: .5}),
     // p = R.circle(430, 100, 50).attr({fill: "hsb(.8, 1, 1)", stroke: "none", opacity: .5});
 
-var forEl = function(el, elfn) { //Execute the function for all elements in set
+var forEl = function(el, elfn) { //Execute the function for all elements in set (not sets)
     el.forEach(function(sel) {
         if(sel.constructor.prototype ==  Raphael.st) {
             forEl(sel, elfn);
@@ -60,10 +62,14 @@ var start = function () {
     // console.log(this.ox, this.oy);
     // this.animate({r: 70, opacity: .25}, 500, ">");
 },
-move = function (dx, dy) {
+move = function (dx, dy, x) {
     forEl(this.parent, function(el) {
         el.attr({x: el.ox + dx, y: el.oy + dy})
     });
+    if(dropid !== -1 && dropid !== holdid){
+        left = x < dropel.attr("x") + dropel.getBBox().width / 5;
+        console.log(left)
+    }
     // console.log(this.ox);
 },
 up = function () {
@@ -72,14 +78,18 @@ up = function () {
             el.attr({x: el.ox, y: el.oy})
         });
     };
+    console.log(holdid, dropid, left);
     holdid = -1;
     // this.animate({r: 50, opacity: .5}, 500, ">");
-    console.log(dropid);
+    
 
 },
 over = function() {
 	this.attr({opacity: 0.7, cursor: "default"})
-    if (-1 !== holdid) { dropid = this.id; };
+    if (-1 !== holdid) { 
+        dropid = this.id;
+        dropel=this; 
+    };
 },
 out = function() {
 	this.attr({opacity: 1})
@@ -94,6 +104,9 @@ while (bot) {
 } 
 // span.def{cursor:default};
 // res.node.setAttribute("class","def")
+
+//==============================================
+
 R.set(res).attr({"font-size": 55})
 R.set(res).drag(move, start, up);
 R.set(res).mouseover(over);
