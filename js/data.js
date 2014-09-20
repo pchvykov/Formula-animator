@@ -40,7 +40,7 @@ var Formula = function(data){
 				//test id number
 				check_id = parseInt(se.substring(1))
 				return function(n){
-					if(n.id == check_id) return truel
+					if(n.id == check_id) return true
 					else return false;
 				}
 			}
@@ -72,7 +72,6 @@ var Formula = function(data){
 
 		var scan = function(n){
 			var results = [];
-			console.log(n);
 			if(checker(n)) results.push(n);
 			for(var i=0; i < n.children.length; i++){
 				results.concat(scan(n.child(i)));
