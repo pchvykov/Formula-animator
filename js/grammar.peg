@@ -24,27 +24,27 @@ p1binop "p1binop"
   / v:value {return v}
 
 p2binop "p2binop" 
-  = base:p1binop code:EXP exp:p2binop {return {id:getid(),type:'op', op:'exp', code:code, exp:exp, base:base}}
+  = base:p1binop code:EXP exp:p2binop {return {id:getid(),type:'op', op:'exp',children:['exp','base'], code:code, exp:exp, base:base}}
   / v:p1binop {return v}
 
 p3binop "p3binop" 
   = v:p2binop code:MULT n:p3binop SEP*
-  	{return {id:getid(),type:'op', op:"mult", code:code, left:v, right:n}}
+  	{return {id:getid(),type:'op', op:"mult", code:code, children:['left','right'],left:v, right:n}}
 
   / code:DIV OCBRACE v:p2binop CCBRACE SEP* OCBRACE n:p3binop CCBRACE
-  	{return {id:getid(),type:'op', op:"div", code:code, top:v, bottom:n}}
+  	{return {id:getid(),type:'op', op:"div",children:['top','bottom'], code:code, top:v, bottom:n}}
 
   /  v:p2binop code:MDIV n:p3binop
-    {return {id:getid(),type:'op', op:"div", code:code, top:v, bottom:n}}
+    {return {id:getid(),type:'op', op:"div", children:['top','bottom'],code:code, top:v, bottom:n}}
 
   / v:p2binop SEP* 
   	{return v}
 
 p4binop "p4binop" //add, sub
   = v:p3binop code:PLUS n:p4binop 
-  	{return {id:getid(),type:'op', op:'plus', code:code, left:v, right:n}}
+  	{return {id:getid(),type:'op', op:'plus', code:code, children:['left','right'],left:v, right:n}}
   / v:p3binop code:MINUS n:p4binop 
-  	{return {id:getid(),type:'op', op:'minus', code:code, left:v, right:n}}
+  	{return {id:getid(),type:'op', op:'minus', code:code, children:['left','right'],left:v, right:n}}
   / v:p3binop SEP* {return v;}
 
 binop "binop"
@@ -54,17 +54,17 @@ exp "exp"
   = t:binop { return t;}
 
 equality "equality"
-  = v:exp code:EQUALS n:exp {return {id:getid(),type:'op', op:'eq', code:code, left:v, right:n}}
+  = v:exp code:EQUALS n:exp {return {id:getid(),type:'op', op:'eq', children:['left','right'],code:code, left:v, right:n}}
   
 
 
 number "number"
   = v:DECIMAL { 
-   return { id:getid(), type:'number', value:v };
+   return { id:getid(), type:'number', children:[], value:v };
   }
 
 variable "variable" 
-  = v:LITERAL {return {id:getid(), type:"variable", code:v.sym, name:v.name}}
+  = v:LITERAL {return {id:getid(), children:[], type:"variable", code:v.sym, name:v.name}}
 
 value "value"
   = n:number SEP* {return n;}
