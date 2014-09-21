@@ -73,9 +73,10 @@ Transforms.Distribute = function(){
 	}
 	this.find = function(filter, form){
 		var params = this.make_checker(filter);
+		console.log('s');
 		var unfilt = form.get('type:op op:mult');
 		var result = [];
-		
+		console.log('s2');
 		for(var i=0; i < unfilt.length; i++){
 			if(this.test(params,unfilt[i])){
 				result.push(unfilt[i]);
@@ -83,8 +84,23 @@ Transforms.Distribute = function(){
 		}
 		return result;
 	}
-	this.apply = function(params, form){
-
+	this.apply = function(node, form){
+		var factor;
+		var terms;
+		if(node.right.type == 'op' && node.right.op == 'paren'){
+			factor = node.left;
+			terms = node.right;
+		}
+		else if(node.left.type =='op' && node.left.op == 'paren'){
+			factor = node.right;
+			terms = node.left;
+		}
+		form.remove(terms, 'exp'); // remove the parenthesis, replace with exp.
+		//multiply with each of the terms.
+		for(var i=0; i < terms.children.length; i++){
+			console.log("term",i,terms.child(i))
+		}
+		
 	}
 };
 Transforms.Distribute.prototype = new Transform();
