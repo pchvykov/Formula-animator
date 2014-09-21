@@ -9,10 +9,10 @@ function decimalToHexString(number)
 }
 
 var toUnicodeSequence = function(code){
-	var orig = code.match(/&#([0-9]*);/g);
+	var orig = code.match(/@([0-9]*)/g);
 
 	for(var i = 0; i < orig.length; i++){
-		var snum = orig[i].substring(2,orig[i].length-1);
+		var snum = orig[i].substring(1);
 		var hex = decimalToHexString(parseInt(snum));
 		var zeroes = "0000";
 		hex = zeroes.substring(hex.length)+ hex;
@@ -25,15 +25,15 @@ var toUnicodeSequence = function(code){
 }
 
 var toUnicodeCharacter = function(code){
-	var orig = code.match(/&#([0-9]*);/g);
+	var orig = code.match(/@([0-9]*)/g);
 	
 	for(var i = 0; i < orig.length; i++){
-		var snum = orig[i].substring(2,orig[i].length-1);
+		var snum = orig[i].substring(1);
 		var dec = (parseInt(snum));
 		var sym = String.fromCharCode(dec);
 		var re = new RegExp(orig[i], "g");
 		code = code.replace(re, sym);
 	}
-
+	console.log(code);
 	return code;
 }

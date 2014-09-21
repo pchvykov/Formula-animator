@@ -89,7 +89,7 @@ LITERAL "LITERAL"
   / "\\"l:[A-Za-z]+ 
 	  {
 	  	var name = l.join("");
-	  	var sym = '&#'+SYMBOL_TABLE[name]+";";
+	  	var sym = "@"+SYMBOL_TABLE[name];
 	  	return {name:name, sym:sym}
 	  }
 
