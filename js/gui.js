@@ -8,14 +8,17 @@
 
 // document.onselectstart = function(){ return false; }
 window.onload = function () {
-    holdid = -1; dropid = -1; left = false;
+    var holdid = -1,
+        dropid = -1, 
+        left = false,
+        exec = -1;
 
 // var tree = { "id": 29, "type": "op", "op": "eq", "code": "=", "left": 
 // { "id": 16, "type": "op", "op": "plus", "code": "+", "left": 
 // { "id": 3, "type": "number", "value": 5 }, "right": { "id": 15, "type": "number", "value": 6 } }, 
 // "right": { "id": 28, "type": "number", "value": 7 } };
 
-var R = Raphael(0, 0, "100%", "100%");
+var R = Raphael(0, 0, "100%", "100%"),
     s1 = R.text(250, 100, '='),
     s2 = R.text(150, 100, '+'),
 	s3 = R.text(100, 100, '5'),
@@ -94,6 +97,11 @@ over = function() {
 out = function() {
 	this.attr({opacity: 1})
     dropid = -1;
+},
+dblcl = function() {
+    exec = this.id;
+    this.attr({stroke: "red"})
+    console.log(exec);
 };
 
 
@@ -111,4 +119,5 @@ R.set(res).attr({"font-size": 55})
 R.set(res).drag(move, start, up);
 R.set(res).mouseover(over);
 R.set(res).mouseout(out);
+R.set(res).dblclick(dblcl);
 };
