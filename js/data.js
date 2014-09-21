@@ -80,6 +80,19 @@ var Formula = function(data){
 		}
 		return results;
 	}
+	this.remove = function(target, child_to_moveup){
+		var par = target.parent();
+		var chld = target[child_to_moveup];
+		console.log(target, par, chld);
+		for(var i=0; i < par.children.length; i++){
+			var key = par.children[i];
+			if(par.child(i).id == target.id){
+				console.log("found child");
+				par[key] = target[child_to_moveup];
+				chld.parent_id = par.id;
+			}
+		}
+	}
 	this.get = function(exp){
 		return this.subtree_get(exp, this.data);
 	}
