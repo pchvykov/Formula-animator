@@ -4,13 +4,13 @@
 var Formula = function(data){
 	this.NODES = {
 		OP: {
-			MULT: {left:null, right:null,children:['left','right'],type:'op',op:'mult'},
+			MULT: {left:null, right:null,children:['left','right'],type:'op',code:'*',op:'mult'},
 			DIV: {},
 			PAREN: {exp:null,children:['exp'],type:'op',op:'paren'},
-			ADD: {left:null, right:null,children:['left','right'],type:'op',op:'plus'},
-			SUB: {left:null, right:null,children:['left','right'],type:'op',op:'minus'},
+			ADD: {left:null, right:null,children:['left','right'],type:'op',code:'+',op:'plus'},
+			SUB: {left:null, right:null,children:['left','right'],type:'op',code:'-',op:'minus'},
 			EXP: {},
-			EQ: {left:null, right:null,children:['left','right'],type:'op',op:'eq'}
+			EQ: {left:null, right:null,children:['left','right'],type:'op',code:'=',op:'eq'}
 		},
 		VARIABLE: {children:[], type:"variable", code:null, name:null},
 		NUMBER: { type:'number', children:[], code:null,value:null}
@@ -22,7 +22,7 @@ var Formula = function(data){
 		var link_vars = function(parent, node){
 			that.__init_node(parent,node);
 			for(var i=0; i < node.children.length; i++){
-				link_vars(node, node[node.children[i]]);
+				link_vars(node, node.child(i));
 			}
 
 		}
@@ -39,7 +39,9 @@ var Formula = function(data){
 			node.parent_id = null;
 		}
 		node.parent = function(){
-			if(this.parent_id != null) return that.get("#"+this.parent_id)[0];
+			if(this.parent_id != null){
+				return that.get("#"+this.parent_id)[0];
+			}
 			else return null;
 		}
 		node.child = function(i){return this[this.children[i]]}
@@ -135,6 +137,7 @@ var Formula = function(data){
 		}
 		else{
 			this.data = newnode;
+			newnode.parent_id = null;
 		}
 	}
 	this.remove = function(target, child_to_moveup){
@@ -154,6 +157,30 @@ var Formula = function(data){
 	}
 	this.copy = function(){
 		return JSON.parse(JSON.stringify(this.data,null,2));
+	}
+	this.print = function(){
+		var print_node =  function(n){
+			if(n.op == 'plus' || n.op == 'minus' || n.op == 'eq' ||
+				n.op == 'div' || n.op == 'mult'){
+				return print_node(n.left)+ n.code + print_node(n.right);
+			}
+			else if(n.op == 'div' || n.op == 'exp'){
+				return print_node(n.top)+ n.code + print_node(n.bottom);
+			}
+			else if(n.op == 'paren'){
+				return "("+print_node(n.exp)+")"
+			}
+			else if(n.type == 'variable'){
+				return  n.code;
+			}
+			else if(n.type == 'number'){
+				return n.code;
+			}
+			else{
+				console.log("ERROR:",n);
+			}
+		}
+		return print_node(this.data);
 	}
 	this.init(data);
 }
