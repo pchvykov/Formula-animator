@@ -15,10 +15,6 @@ var mock1 = {
 Parser = function(){
 	//takes text, turns it into tree
 
-	this.op_map = {
-		"plus":"+",
-		"mult":"*"
-	}
 	this.init = function(){
 		var that = this;
 		this.peg = PEG;
