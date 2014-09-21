@@ -18,9 +18,13 @@ var toUnicodeSequence = function(code){
 		hex = zeroes.substring(hex.length)+ hex;
 		var re = new RegExp(orig[i], "g");
 
-		code = code.replace(re, '\\u'+hex);
+		code = code.replace(re, 'F\\\\u'+hex);
 	}
 
+// <<<<<<< HEAD
+	var res = code.replace(/&#([0-9]*);/g, 'F\\u$1')
+	return res;
+// =======
 	return code;
 }
 
@@ -36,4 +40,5 @@ var toUnicodeCharacter = function(code){
 	}
 	console.log(code);
 	return code;
+// >>>>>>> a7a84ac1d896e91ac619ec390381b61ac51e02c9
 }
