@@ -40,7 +40,7 @@ Transform = function(){
 
 Transforms = {};
 
-Transform.SimplifyConstants = function(){
+Transforms.SimplifyConstants = function(){
 	/*
 	params: term:XXX term:XXX
 	*/
@@ -100,34 +100,23 @@ Transform.SimplifyConstants = function(){
 		
 	}
 }
-Transform.SimplifyConstants.prototype = new Transform();
+Transforms.SimplifyConstants.prototype = new Transform();
 
 Transforms.Distribute = function(){
 
 	/*
-	params: factor:XXX term:XXX term:XXX
+	params: term:XXX term:XXX
 	*/
 	this.test = function(params,node){
-		var factor = null
-		var terms = null;
-		if(node.right.type == 'op' && node.right.op == 'paren'){
-			factor = node.left;
-			terms = node.right;
-		}
-		else if(node.left.type =='op' && node.left.op == 'paren'){
-			factor = node.right;
-			terms = node.left;
-		}
-		else return false;
-		if(params.hasOwnProperty('factor')){
-			var id = params['factor'];
-			if(factor.id != id) return false;
-		}
+		if(!((node.right.type == 'op' && node.right.op == 'paren')
+			||(node.left.type =='op' && node.left.op == 'paren')))
+			return false;
+
 		if(params.hasOwnProperty('term')){
 			var t = params.term;
 			if (!(params.term instanceof Array)) t = [params.term];
 			for(var i=0; i < t.length; i++){
-				var res = terms.get('#'+t[i]);
+				var res = node.get('#'+t[i]);
 				if(res.length == 0) return false;
 			}
 		}
@@ -148,6 +137,7 @@ Transforms.Distribute = function(){
 	this.apply = function(node, form){
 		var factor;
 		var terms;
+		var terms_k = '';
 		if(node.right.type == 'op' && node.right.op == 'paren'){
 			factor = node.left;
 			terms = node.right;
@@ -156,23 +146,23 @@ Transforms.Distribute = function(){
 			factor = node.right;
 			terms = node.left;
 		}
+		form.replace(node, terms); // remove the parenthesis, replace with exp.
 		form.remove(terms, 'exp'); // remove the parenthesis, replace with exp.
 		terms = terms.exp;
 		//multiply with each of the terms.
 		for(var i=0; i < terms.children.length; i++){
 			var paren = form.create('op.paren');
 			var mul = form.create('op.mult');
+
 			var f = factor.copy();
 			//build subtree
 			mul.set('left',f);
 			mul.set('right',paren);
 			paren.set('exp',terms.child(i));
-
-			var key = terms.children[i];
-			terms.set(key, mul);
-			console.log(terms,"term",i)
+			terms.set(terms.children[i], mul);
 		}
 		
 	}
 };
 Transforms.Distribute.prototype = new Transform();
+
