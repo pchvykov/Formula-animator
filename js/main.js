@@ -34,7 +34,7 @@ $( document ).ready(function() {
     	var form_str = form.toString();
     	// $("#formula_latex_debug").html(form_str);
     	// console.log(form.data);
-        var v = scan_tree(form.data, 0,0,0,SVG);
+        v = scan_tree(form.data, 0,0,SVG);
         // console.log(v)
         display_equation(v,[0,30]);
 
