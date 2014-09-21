@@ -33,7 +33,7 @@ function original_scan_tree(input) //Sarah gives me the Raphael paper
 	return(text_result);
 }
 
-function scan_tree(input,parent_set,parent_node,root_node_position,paper) //This is the third version of the scan_tree function. It is different in that instead of outputing a set of objects, it outputs a set of sets.
+function scan_tree(input,parent_set,parent_node,paper) //This is the third version of the scan_tree function. It is different in that instead of outputing a set of objects, it outputs a set of sets.
 /*
 This function scans a 'tree object' (provided by Sarah) and then generates Raphael or SVG text objects that have various attributes. Function is recursive.
 Inputs are:
@@ -60,120 +60,17 @@ The output of this function is a set of Raphael objects. Each object has a numbe
 		root_text_object.data('code',input.code); //Save code
 		root_text_object.data('level',0); //Root node should have a level of 0
 		//root_text_object.data('whoisyourdad',0); //Create custom attribute which saves the parent node
-		root_text_object.parent = 0; //Create custom attribute which saves the parent node
+		root_text_object.parent = parent_set; //Create custom attribute which saves the parent node
 
 
 		parent_set.push(
 	    	root_text_object //Pushes 1st element on to the root set
 	    );
 
+	    if(typeof input.left !== 'undefined'){
+			scan_tree(input, parent_set, root_text_object, paper);}
 
-		//Now examine the left node
-	    if (input.left.type == 'op') //Not at a terminal node
-		{
-			var left_text_object = paper.text(); //Create text object
-			left_text_object.data('type','non_terminal_node_left'); //Create a custom 'type' attribute which saves the type of node and its ID
-			//left_text_object.data('id',input.left.id); //Create a custom 'ID' attribute which saves the type of node and its ID
-			left_text_object.id = input.left.id;
-			left_text_object.data('code',input.left.code); //Save symbol
-			left_text_object.data('level',1); //Level 1 element
-			//left_text_object.data('whoisyourdad', root_text_object); //Create custom attribute which saves the parent node
-			left_text_object.parent = root_text_object; //Create custom attribute which saves the parent node
-			left_text_object.data('absolute_orientation', 'left'); //Absolute orientation is either left or right. As in, the tree must only have two main branches.
-
-		    // Create a new set and add this node to that set and then add to the parent set
-		    var another_set = paper.set(); //Creates new set
-		    another_set.push(
-		    	left_text_object
-		    );
-
-		    another_set = scan_tree(input.left, another_set, left_text_object, root_node_position, paper); //Recursively call scan_tree to descend down the tree further
-
-		    parent_set.push( 
-		    	another_set //Add new set to parent set
-		    );
-
-
-		    //result_set = scan_tree(input.left, another_set, left_text_object, root_node_position, paper); //Recursively call scan_tree to descend down the tree further
-		}
-		else //Found a terminal node
-		{
-			var left_text_object = paper.text(); //Create a text object containing terminal node result
-			left_text_object.data('type','terminal_node_left'); //Create a custom 'type' attribute which saves the type of node and its ID
-			//left_text_object.data('id',input.left.id); //Create a custom 'ID' attribute which saves the type of node and its ID
-			left_text_object.id = input.left.id;
-			left_text_object.data('code',input.left.code); //Save symbol
-			left_text_object.data('level',1);
-			//left_text_object.data('whoisyourdad', root_text_object); //Create custom attribute which saves the root node
-			left_text_object.data('absolute_orientation', 'left');
-
-			var another_set = paper.set();
-			another_set.push(
-				left_text_object
-				);
-			left_text_object.parent = another_set; //Create custom attribute which saves the parent node
-			
-		    // Add terminal node to the set
-		    parent_set.push(
-		    	//left_text_object
-		    	another_set
-		    );
-		}
-
-
-		///Now examine Right node
-		if (input.right.type == 'op') //Not at a terminal node
-		{
-			var right_text_object = paper.text(); //Create text object
-			right_text_object.data('type','non_terminal_node_right'); //Create a custom 'type' attribute which saves the type of node and its ID
-			//right_text_object.data('id',input.right.id); //Create a custom 'ID' attribute which saves the type of node and its ID
-			right_text_object.id = input.right.id;
-			right_text_object.data('code',input.right.code); //Save symbol
-			right_text_object.data('level',1); //Level 1 element
-			//right_text_object.data('whoisyourdad', root_text_object); //Create custom attribute which saves the parent node
-			right_text_object.parent = root_text_object; //Create custom attribute which saves the parent node
-			right_text_object.data('absolute_orientation', 'right');
-
-		    // Add terminal node to the set
-		    var another_set = paper.set();
-
-		    another_set.push(
-				right_text_object
-			);
-
-			another_set = scan_tree(input.right, another_set, right_text_object, root_node_position, paper); //Recursively call scan_tree to descend down the tree further
-
-		    parent_set.push(
-		    	another_set
-		    );
-
-		  //  result_set = scan_tree(input.right, another_set, right_text_object, root_node_position, paper); //Recursively call scan_tree to descend down the tree further
-		}
-		else //Found a terminal node
-		{
-			var right_text_object = paper.text(); //Create a text object containing terminal node result
-			right_text_object.data('type','terminal_node_right'); //Create a custom 'type' attribute which saves the type of node and its ID
-			//right_text_object.data('id',input.right.id); //Create a custom 'ID' attribute which saves the type of node and its ID
-			right_text_object.id = input.right.id;
-			right_text_object.data('code',input.right.code); //Save symbol
-			right_text_object.data('level',1);
-			//right_text_object.data('whoisyourdad', root_text_object); //Create custom attribute which saves the parent node
-			right_text_object.data('absolute_orientation', 'right');
-
-			var another_set = paper.set();
-			another_set.push(
-				right_text_object
-				);
-			right_text_object.parent = another_set; //Create custom attribute which saves the parent node
-			
-		    // Add terminal node to the set
-		    parent_set.push(
-		    	//right_text_object
-		    	another_set
-		    );
-
-		}
-
+		
 	}
 	else //No longer at starting node
 	{
@@ -188,7 +85,6 @@ The output of this function is a set of Raphael objects. Each object has a numbe
 			left_text_object.data('code',input.left.code); //Save symbol
 			left_text_object.data('level',(parent_node.data('level') + 1)); //Update level of this node
 			//left_text_object.data('whoisyourdad', parent_node); //Create custom attribute which saves the parent node
-			left_text_object.parent = parent_node; //Create custom attribute which saves the parent node
 			left_text_object.data('absolute_orientation', parent_node.data('absolute_orientation'));
 
 		   //Create a new set and add node to set
@@ -197,8 +93,9 @@ The output of this function is a set of Raphael objects. Each object has a numbe
 		   	another_set.push(
 		   		left_text_object
 		   	);
-
-		   	another_set = scan_tree(input.left, another_set, left_text_object, root_node_position, paper); //Recursively call scan_tree to descend down the tree further
+		   	left_text_object.parent = another_set; //Create custom attribute which saves the parent node
+			
+		   	scan_tree(input.left, another_set, left_text_object, paper); //Recursively call scan_tree to descend down the tree further
 
 		   	parent_set.push(
 		   		another_set
@@ -214,14 +111,14 @@ The output of this function is a set of Raphael objects. Each object has a numbe
 			left_text_object.data('code',input.left.code); //Save symbol
 			left_text_object.data('level',(parent_node.data('level') + 1)); //Update level of this node
 			//left_text_object.data('whoisyourdad', parent_node); //Create custom attribute which saves the parent node
-			left_text_object.parent = parent_node; //Create custom attribute which saves the parent node
 			left_text_object.data('absolute_orientation', parent_node.data('absolute_orientation')); //Inherits absolute orientation of its parent
 
 			var another_set = paper.set();
 			another_set.push(
 				left_text_object
 				);
-
+			left_text_object.parent = another_set; //Create custom attribute which saves the parent node
+			
 		    // Add terminal node to the set
 		    parent_set.push(
 		    	//left_text_object
@@ -240,7 +137,6 @@ The output of this function is a set of Raphael objects. Each object has a numbe
 			right_text_object.data('code',input.right.code); //Save symbol
 			right_text_object.data('level',(parent_node.data('level') + 1)); //Update level of this node
 			//right_text_object.data('whoisyourdad', parent_node); //Create custom attribute which saves the parent node
-			right_text_object.parent = parent_node; //Create custom attribute which saves the parent node
 			right_text_object.data('absolute_orientation', parent_node.data('absolute_orientation')); //Inherits absolute orientation of its parent
 
 		    // Add terminal node to the set
@@ -249,8 +145,9 @@ The output of this function is a set of Raphael objects. Each object has a numbe
 		    another_set.push(
 				right_text_object
 			);
-
-			another_set = scan_tree(input.right, another_set, right_text_object, root_node_position, paper); //Recursively call scan_tree to descend down the tree further
+		    right_text_object.parent = another_set; //Create custom attribute which saves the parent node
+			
+			scan_tree(input.right, another_set, right_text_object, paper); //Recursively call scan_tree to descend down the tree further
 
 		    parent_set.push(
 		    	another_set
@@ -265,14 +162,14 @@ The output of this function is a set of Raphael objects. Each object has a numbe
 			right_text_object.data('code',input.right.code); //Save symbol
 			right_text_object.data('level',(parent_node.data('level') + 1)); //Update level of this node
 			//right_text_object.data('whoisyourdad', parent_node); //Create custom attribute which saves the parent node
-			right_text_object.parent = parent_node; //Create custom attribute which saves the parent node
 			right_text_object.data('absolute_orientation', parent_node.data('absolute_orientation')); //Inherits absolute orientation of its parent
 
 			var another_set = paper.set();
 			another_set.push(
 				right_text_object
 				);
-
+			right_text_object.parent = another_set; //Create custom attribute which saves the parent node
+			
 		    // Add terminal node to the set
 		    parent_set.push(
 		    	//right_text_object
@@ -285,7 +182,7 @@ The output of this function is a set of Raphael objects. Each object has a numbe
 }
 
 
-var toRaphaelUnicode = function(t){return t.replace(/&#([0-9]*);/g, '\\u$1')}
+// var toRaphaelUnicode = function(t){return t.replace(/&#([0-9]*);/g, '\\u$1')}
 function display_equation(parent_set,origin)
 {
 	//This function parses through the set structure generated by scan_tree and then displays the text as Raphael SVG text objects. Basically, it's just a matter of assigning the right coordinates to those text elements that were already generated
@@ -297,7 +194,7 @@ function display_equation(parent_set,origin)
 	if (parent_set.length == 1) //Only display if you've hit a terminal node. A terminal node is a set which has only one element. A single element is not explicitly defined as a set is NOT a set and the .length method is not defined for it
 	{
 		// console.log(daddy_element);
-		daddy_element.attr({text: toRaphaelUnicode(daddy_element.data('code')), x: (origin[0] + offset), y: origin[1], "font-size": font_size});
+		daddy_element.attr({text: daddy_element.data('code'), x: (origin[0] + offset), y: origin[1], "font-size": font_size});
 		var new_origin = [(origin[0] + offset),origin[1]];
 		return new_origin;
 	}
