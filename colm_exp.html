@@ -1,0 +1,57 @@
+<head>
+<script src="lib/jquery-1.11.1.min.js"></script>
+<script src="lib/raphael.js"></script>
+<script src="lib/peg.0.8.0.js"></script>
+<script src="js/renderer.js"></script>
+<script src="js/data.js"></script>
+<script src="js/animate.js"></script>
+<script src="js/event.js"></script>
+<script src="js/parser.js"></script>
+<script src="js/main.js"></script>
+<script src="js/mock.js"></script>
+
+	<style type="text/css">
+	            #canvas_container {
+	                width: 500px;
+	                border: 1px solid #aaa;
+	            }
+	</style>
+</head>
+
+<body>
+	<div id="canvas_container"></div> <!-- My addition -->
+
+<input id="formula_latex" type="text"></input>
+<div id="formula_latex_debug">
+
+</div>
+<div style="background-color:black;" id="formula_container">
+
+
+</div> 
+
+<script> 
+//alert("Hello! I am an alert box!!");
+console.log("test_animate")
+//var paper = new Raphael(10, 50, 320, 200); 
+var paper = new Raphael(document.getElementById('canvas_container'), 500, 500);
+
+edwin_obj = paper.text(180, 150, "40");
+edwin_obj.attr({
+  'font-size':30
+});
+
+var path = new AnimationHandler().animate_arc(edwin_obj,250, 100);
+console.log(path)
+
+// console.log("raphael1234")
+
+set_result = scan_tree_v3(mock6,0,0,0,paper);
+display_set_result = display_equation(set_result,[10,10]);
+
+ </script>
+
+
+
+</body>
+
