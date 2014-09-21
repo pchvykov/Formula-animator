@@ -36,7 +36,7 @@ $( document ).ready(function() {
     	// console.log(form.data);
         v = scan_tree(form.data, 0,0,SVG);
         // console.log(v)
-        display_equation(v,[0,30]);
+        display_equation(v,[50,30]);
 
         set_gui(v);
     	/*

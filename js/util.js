@@ -18,9 +18,9 @@ var toUnicodeCharacter = function(code){
 		hex = zeroes.substring(hex.length)+ hex;
 		var re = new RegExp(orig[i], "g");
 
-		code = code.replace(re, '\\u'+hex);
+		code = code.replace(re, 'F\\\\u'+hex);
 	}
 
-	var res = code.replace(/&#([0-9]*);/g, '\\u$1')
+	var res = code.replace(/&#([0-9]*);/g, 'F\\u$1')
 	return res;
 }

@@ -194,7 +194,7 @@ function display_equation(parent_set,origin)
 	if (parent_set.length == 1) //Only display if you've hit a terminal node. A terminal node is a set which has only one element. A single element is not explicitly defined as a set is NOT a set and the .length method is not defined for it
 	{
 		// console.log(daddy_element);
-		daddy_element.attr({text: daddy_element.data('code'), x: (origin[0] + offset), y: origin[1], "font-size": font_size});
+		daddy_element.attr({text: toUnicodeCharacter(daddy_element.data('code')), x: (origin[0] + offset), y: origin[1], "font-size": font_size});
 		var new_origin = [(origin[0] + offset),origin[1]];
 		return new_origin;
 	}
