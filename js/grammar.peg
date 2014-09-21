@@ -1,12 +1,12 @@
 {
   var CURR_ID = 0;
   var SYMBOL_TABLE = {
-  	"Alpha":"&#913;",
-  	"Beta":"&#914",
-  	"Gamma": "&#915;",
-  	"alpha": "&#945;",
-  	"beta":"&#946;",
-  	"gamma": "&#947;"
+  	"Alpha":"913",
+  	"Beta":"914",
+  	"Gamma": "915",
+  	"alpha": "945",
+  	"beta":"946",
+  	"gamma": "947"
   }
   function getid() {
     var id = CURR_ID;
@@ -89,7 +89,7 @@ LITERAL "LITERAL"
   / "\\"l:[A-Za-z]+ 
 	  {
 	  	var name = l.join("");
-	  	var sym = SYMBOL_TABLE[name];
+	  	var sym = '&#'+SYMBOL_TABLE[name]+";";
 	  	return {name:name, sym:sym}
 	  }
 
