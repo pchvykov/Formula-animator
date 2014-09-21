@@ -1,35 +1,4 @@
-//define special rule language
 
-//matching tree. 
-/*
-## Pattern Matching
-Nodes: {TAG|TAG|TAG|TAG} -> {+} {-} {*} {^} {log} : a node with name TAG.
-Nodes: [Hole] -> any node can go here. : [_]
-Nodes: [Named Hole] -> : a node of name X must go here. [X]
-Nodes: []
-
-Example Decomp:
-  <- {DIST_OP:*} ->
-  [C]   {PNODE:()} ->
-         {INNER_OP:+}
-       [A]  [B]
-
-Transformations: Distribute: //distract
-	rep [A] => {DIST_OP}-> [A] | [C]
-	rep [B] => {DIST_OP}-> [B] | [C]
-	del [C]
-	del {DIST_OP:*} //must have only one child to move up.
-
-
-Example Assoc:
-  <- {DIST_OP:+|-|*} ->
-  [C]    {PLUS:+|-|*}
-        [B] [A]
-
-
-## Pattern Transformation
-Given a pattern tree
-*/
 var copy = function(d){
 	return JSON.parse(JSON.stringify(d,null,2))
 }
