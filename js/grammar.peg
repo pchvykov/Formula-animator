@@ -60,7 +60,7 @@ equality "equality"
 
 number "number"
   = v:DECIMAL { 
-   return { id:getid(), type:'number', children:[], value:v };
+   return { id:getid(), type:'number', children:[], code:(""+v),value:v };
   }
 
 variable "variable" 

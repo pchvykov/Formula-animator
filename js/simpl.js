@@ -7,7 +7,6 @@ Transform = function(){
 	this.make_checker = function(filter){
 		var sexpr = filter.split(' ');
 		var dict = {};
-		console.log(sexpr);
 		for(var i =0; i < sexpr.length; i++){
 			var args = sexpr[i].split(':');
 			if(args.length >= 2){
@@ -45,11 +44,30 @@ Transforms.Distribute = function(){
 	/*
 	params: factor:XXX term:XXX term:XXX
 	*/
+	this.test = function(params,node){
+		console.log(node)
+		if(node.right.type == 'op' && node.right.op == 'paren'){
+			return true;
+		}
+		else if(node.left.type =='op' && node.left.op == 'paren'){
+			return true;
+		}
+		else return false;
+
+	}
 	this.find = function(filter, form){
 		var params = this.make_checker(filter);
-		var mults = form.get('type:op op:mult');
-		console.log(mults);
-		return mults;
+		console.log("ufilt");
+		var unfilt = form.get('type:op op:mult');
+		var result = [];
+		
+		for(var i=0; i < unfilt.length; i++){
+			if(this.test(params,unfilt[i])){
+				result.push(unfilt[i]);
+			}
+		}
+		console.log(result);
+		return result;
 	}
 	this.apply = function(params, form){
 

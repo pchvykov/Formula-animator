@@ -15,7 +15,7 @@ var Formula = function(data){
 				node.parent_id = null;
 				node.parent = function(){return null;}
 			}
-
+			node.get = function(expr){that.subtree_get(expr, this)}
 			node.child = function(i){return this[this.children[i]]}
 			for(var i=0; i < node.children.length; i++){
 				link_vars(node, node[node.children[i]]);
@@ -70,19 +70,18 @@ var Formula = function(data){
 			return isTrue;
 		}
 	}
-	this.get = function(exp){
+	this.subtree_get = function(exp, n){
 		var checker = this.to_checker(exp);
-
-		var scan = function(n){
-			var results = [];
-			if(checker(n)) results.push(n);
-			for(var i=0; i < n.children.length; i++){
-				var subres = scan(n.child(i));
-				results = results.concat(subres);
-			}
-			return results;
+		var results = [];
+		if(checker(n)) results.push(n);
+		for(var i=0; i < n.children.length; i++){
+			var subres = this.subtree_get(exp, n.child(i));
+			results = results.concat(subres);
 		}
-		return scan(this.data);
+		return results;
+	}
+	this.get = function(exp){
+		return this.subtree_get(exp, this.data);
 	}
 	this.init = function(d){
 		this.data = d;
