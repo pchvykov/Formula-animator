@@ -15,7 +15,7 @@ var Formula = function(data){
 				node.parent_id = null;
 				node.parent = function(){return null;}
 			}
-			node.get = function(expr){that.subtree_get(expr, this)}
+			node.get = function(expr){return that.subtree_get(expr, this)}
 			node.child = function(i){return this[this.children[i]]}
 			for(var i=0; i < node.children.length; i++){
 				link_vars(node, node[node.children[i]]);

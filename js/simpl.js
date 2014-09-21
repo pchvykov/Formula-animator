@@ -45,19 +45,34 @@ Transforms.Distribute = function(){
 	params: factor:XXX term:XXX term:XXX
 	*/
 	this.test = function(params,node){
-		console.log(node)
+		var factor = null
+		var terms = null;
 		if(node.right.type == 'op' && node.right.op == 'paren'){
-			return true;
+			factor = node.left;
+			terms = node.right;
 		}
 		else if(node.left.type =='op' && node.left.op == 'paren'){
-			return true;
+			factor = node.right;
+			terms = node.left;
 		}
 		else return false;
+		if(params.hasOwnProperty('factor')){
+			var id = params['factor'];
+			if(factor.id != id) return false;
+		}
+		if(params.hasOwnProperty('term')){
+			var t = params['term'];
+			if (!params.term instanceof Array) t = [params.term];
+			for(var i=0; i < t.length; i++){
+				var res = terms.get('#'+t[i]);
+				if(res.length == 0) return false;
+			}
+		}
+		return true;
 
 	}
 	this.find = function(filter, form){
 		var params = this.make_checker(filter);
-		console.log("ufilt");
 		var unfilt = form.get('type:op op:mult');
 		var result = [];
 		
@@ -66,7 +81,6 @@ Transforms.Distribute = function(){
 				result.push(unfilt[i]);
 			}
 		}
-		console.log(result);
 		return result;
 	}
 	this.apply = function(params, form){
