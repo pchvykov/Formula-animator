@@ -73,9 +73,10 @@ Transforms.Distribute = function(){
 	}
 	this.find = function(filter, form){
 		var params = this.make_checker(filter);
+		console.log('s');
 		var unfilt = form.get('type:op op:mult');
 		var result = [];
-		
+		console.log('s2');
 		for(var i=0; i < unfilt.length; i++){
 			if(this.test(params,unfilt[i])){
 				result.push(unfilt[i]);

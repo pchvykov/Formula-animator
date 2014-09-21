@@ -1,22 +1,26 @@
+
+
+
 var Formula = function(data){
+	this.NODES = {
+		OP: {
+			MULT: {left:null, right:null,children:['left','right'],type:'op',op:'mult'},
+			DIV: {},
+			PAREN: {},
+			ADD: {left:null, right:null,children:['left','right'],type:'op',op:'add'},
+			SUB: {left:null, right:null,children:['left','right'],type:'op',op:'sub'},
+			EXP: {},
+			EQ: {left:null, right:null,children:['left','right'],type:'op',op:'eq'}
+		},
+		VARIABLE: {},
+		NUMBER: {}
+
+
+	}
 	this._build_data = function(d){
 		var that = this;
-		var index = 0;
 		var link_vars = function(parent, node){
-			node.id = index;
-			index++;
-			if(parent != null){
-				node.parent_id = parent.id;
-				node.parent = function(){
-					return that.get("#"+this.parent_id)[0];
-				}
-			}
-			else{
-				node.parent_id = null;
-				node.parent = function(){return null;}
-			}
-			node.get = function(expr){return that.subtree_get(expr, this)}
-			node.child = function(i){return this[this.children[i]]}
+			that.__init_node(parent,node);
 			for(var i=0; i < node.children.length; i++){
 				link_vars(node, node[node.children[i]]);
 			}
@@ -24,6 +28,40 @@ var Formula = function(data){
 		}
 		link_vars(null,d);
 	}
+	this.__init_node = function(parent, node){
+		node.id = this.index;
+		var that = this;
+		if(parent != null){
+			node.parent_id = parent.id;
+			node.parent = function(){
+				return that.get("#"+this.parent_id)[0];
+			}
+		}
+		else{
+			node.parent_id = null;
+			node.parent = function(){return null;}
+		}
+		node.parent = function(){return null;};
+		node.child = function(i){return this[this.children[i]]}
+		node.set = function(k,n){
+			this[k] = n;
+			n.parent_id = this.id;
+		}
+		this.index++;
+	}
+	this.create = function(type){
+		var TYPE = type.toUpperCase().split(".");
+		
+		var cdict = this.NODES;
+		for(var i=0; i < TYPE.length; i++){
+			cdict = cdict[TYPE[i]];
+		}
+		console.log(TYPE, cdict);
+		var node = JSON.parse(JSON.stringify(cdict,null,2));
+		this.__init_node(null, node);
+		return node;
+	}
+
 	/*
 	#id : id number of a node
 	#field:val : field is a particular value
@@ -97,6 +135,7 @@ var Formula = function(data){
 		return this.subtree_get(exp, this.data);
 	}
 	this.init = function(d){
+		this.index = 0;
 		this.data = d;
 		this._build_data(this.data);
 	}
