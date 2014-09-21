@@ -30,11 +30,11 @@ $( document ).ready(function() {
 
     $("#formula_latex").change(function(){
     	var data = $("#formula_latex").val().substr();
-    	var form = parser.parse(data);
+    	form = parser.parse(data);
     	var form_str = form.toString();
     	// $("#formula_latex_debug").html(form_str);
     	// console.log(form.data);
-        v = scan_tree(form.data, 0,0,SVG);
+        v = scan_tree(form.data, 0,SVG);
         // console.log(v)
         display_equation(v,[50,30]);
 
