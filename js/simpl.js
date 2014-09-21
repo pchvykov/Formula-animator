@@ -40,6 +40,13 @@ Transform = function(){
 
 Transforms = {};
 
+Transforms.MoveTerm = function(){
+
+}
+Transforms.MoveTerm.prototype = new Transform();
+
+
+
 Transforms.SimplifyConstants = function(){
 	/*
 	params: term:XXX term:XXX
@@ -137,7 +144,6 @@ Transforms.Distribute = function(){
 	this.apply = function(node, form){
 		var factor;
 		var terms;
-		var terms_k = '';
 		if(node.right.type == 'op' && node.right.op == 'paren'){
 			factor = node.left;
 			terms = node.right;
@@ -148,18 +154,36 @@ Transforms.Distribute = function(){
 		}
 		form.replace(node, terms); // remove the parenthesis, replace with exp.
 		form.remove(terms, 'exp'); // remove the parenthesis, replace with exp.
-		terms = terms.exp;
+		
+		var findterms = function(n){
+			var args = [];
+			if(n.type == 'op' && 
+				(n.op == 'plus' || n.op == 'minus'))
+			{
+				args= args.concat(findterms(n.left));
+				args = args.concat(findterms(n.right));
+			}
+			else if(n.type == 'op' && n.op == "paren"){
+				args = findterms(n.exp);
+			}
+			else{
+				args.push(n);
+			}
+			return args;
+		}
+		var args = findterms(terms);
+		console.log(args);
 		//multiply with each of the terms.
-		for(var i=0; i < terms.children.length; i++){
+		for(var i=0; i < args.length; i++){
 			var paren = form.create('op.paren');
 			var mul = form.create('op.mult');
-
 			var f = factor.copy();
+			var term = args[i];
 			//build subtree
 			mul.set('left',f);
 			mul.set('right',paren);
-			paren.set('exp',terms.child(i));
-			terms.set(terms.children[i], mul);
+			paren.set('exp',term.copy());
+			form.replace(term, mul);
 		}
 		
 	}
