@@ -19,6 +19,7 @@ var BindActionHandlerToSVG = function(sv, data){
 	return a;
 }
 
+
 var SVG = null;
 $( document ).ready(function() {
     console.log( "ready!" );
@@ -32,11 +33,12 @@ $( document ).ready(function() {
     	var form = parser.parse(data);
     	var form_str = form.toString();
     	// $("#formula_latex_debug").html(form_str);
-    	console.log(form.data);
-        v = scan_tree(form.data, 0,0,0,SVG);
+    	// console.log(form.data);
+        var v = scan_tree(form.data, 0,0,0,SVG);
         // console.log(v)
         display_equation(v,[0,30]);
 
+        set_gui(v);
     	/*
     	var srndr=$("#formula_render")
     	
