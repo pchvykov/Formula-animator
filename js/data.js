@@ -1,7 +1,10 @@
 var Formula = function(data){
 	this._build_data = function(d){
 		var that = this;
+		var index = 0;
 		var link_vars = function(parent, node){
+			node.id = index;
+			index++;
 			if(parent != null){
 				node.parent_id = parent.id;
 				node.parent = function(){
@@ -74,7 +77,8 @@ var Formula = function(data){
 			var results = [];
 			if(checker(n)) results.push(n);
 			for(var i=0; i < n.children.length; i++){
-				results.concat(scan(n.child(i)));
+				var subres = scan(n.child(i));
+				results = results.concat(subres);
 			}
 			return results;
 		}

@@ -20,7 +20,7 @@ start
   /exp
 
 p1binop "p1binop" 
-  = OPAREN e:exp CPAREN {return {id:getid(),type:'op', op:'paren', exp:e}}
+  = OPAREN e:exp CPAREN {return {id:getid(),type:'op', op:'paren', children:['exp'], exp:e}}
   / v:value {return v}
 
 p2binop "p2binop" 
