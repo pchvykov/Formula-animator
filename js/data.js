@@ -6,7 +6,7 @@ var Formula = function(data){
 		OP: {
 			MULT: {left:null, right:null,children:['left','right'],type:'op',op:'mult'},
 			DIV: {},
-			PAREN: {},
+			PAREN: {exp:null,children:['exp'],type:'op',op:'paren'},
 			ADD: {left:null, right:null,children:['left','right'],type:'op',op:'add'},
 			SUB: {left:null, right:null,children:['left','right'],type:'op',op:'sub'},
 			EXP: {},
@@ -46,6 +46,12 @@ var Formula = function(data){
 		node.set = function(k,n){
 			this[k] = n;
 			n.parent_id = this.id;
+		}
+		node.get = function(k){
+			return that.subtree_get(k, this);
+		}
+		node.copy = function(){
+			return JSON.parse(JSON.stringify(this,null,2));
 		}
 		this.index++;
 	}
@@ -125,7 +131,6 @@ var Formula = function(data){
 		for(var i=0; i < par.children.length; i++){
 			var key = par.children[i];
 			if(par.child(i).id == target.id){
-				console.log("found child");
 				par[key] = target[child_to_moveup];
 				chld.parent_id = par.id;
 			}

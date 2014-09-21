@@ -8,9 +8,9 @@ function decimalToHexString(number)
     return number.toString(16).toUpperCase();
 }
 
-var toUnicodeCharacter = function(code){
+var toUnicodeSequence = function(code){
 	var orig = code.match(/&#([0-9]*);/g);
-	
+
 	for(var i = 0; i < orig.length; i++){
 		var snum = orig[i].substring(2,orig[i].length-1);
 		var hex = decimalToHexString(parseInt(snum));
@@ -21,6 +21,19 @@ var toUnicodeCharacter = function(code){
 		code = code.replace(re, '\\u'+hex);
 	}
 
-	var res = code.replace(/&#([0-9]*);/g, '\\u$1')
-	return res;
+	return code;
+}
+
+var toUnicodeCharacter = function(code){
+	var orig = code.match(/&#([0-9]*);/g);
+	
+	for(var i = 0; i < orig.length; i++){
+		var snum = orig[i].substring(2,orig[i].length-1);
+		var dec = (parseInt(snum));
+		var sym = String.fromCharCode(dec);
+		var re = new RegExp(orig[i], "g");
+		code = code.replace(re, sym);
+	}
+
+	return code;
 }

@@ -61,8 +61,8 @@ Transforms.Distribute = function(){
 			if(factor.id != id) return false;
 		}
 		if(params.hasOwnProperty('term')){
-			var t = params['term'];
-			if (!params.term instanceof Array) t = [params.term];
+			var t = params.term;
+			if (!(params.term instanceof Array)) t = [params.term];
 			for(var i=0; i < t.length; i++){
 				var res = terms.get('#'+t[i]);
 				if(res.length == 0) return false;
@@ -73,10 +73,8 @@ Transforms.Distribute = function(){
 	}
 	this.find = function(filter, form){
 		var params = this.make_checker(filter);
-		console.log('s');
 		var unfilt = form.get('type:op op:mult');
 		var result = [];
-		console.log('s2');
 		for(var i=0; i < unfilt.length; i++){
 			if(this.test(params,unfilt[i])){
 				result.push(unfilt[i]);
@@ -98,6 +96,13 @@ Transforms.Distribute = function(){
 		form.remove(terms, 'exp'); // remove the parenthesis, replace with exp.
 		//multiply with each of the terms.
 		for(var i=0; i < terms.children.length; i++){
+			var paren = form.create('op.paren');
+			var mul = form.create('op.mult');
+			var f = factor.copy();
+			mul.set('left',f);
+			mul.set('right',paren);
+			paren.set('exp',terms.child(i));
+			console.log(mul);
 			console.log("term",i,terms.child(i))
 		}
 		
