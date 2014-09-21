@@ -62,7 +62,6 @@ var Formula = function(data){
 		for(var i=0; i < TYPE.length; i++){
 			cdict = cdict[TYPE[i]];
 		}
-		console.log(TYPE, cdict);
 		var node = JSON.parse(JSON.stringify(cdict,null,2));
 		this.__init_node(null, node);
 		return node;
@@ -127,13 +126,17 @@ var Formula = function(data){
 	this.remove = function(target, child_to_moveup){
 		var par = target.parent();
 		var chld = target[child_to_moveup];
-		console.log(target, par, chld);
-		for(var i=0; i < par.children.length; i++){
-			var key = par.children[i];
-			if(par.child(i).id == target.id){
-				par[key] = target[child_to_moveup];
-				chld.parent_id = par.id;
+		if(par != null){
+			for(var i=0; i < par.children.length; i++){
+				var key = par.children[i];
+				if(par.child(i).id == target.id){
+					par[key] = target[child_to_moveup];
+					chld.parent_id = par.id;
+				}
 			}
+		}
+		else{
+			this.data = chld;
 		}
 	}
 	this.get = function(exp){
