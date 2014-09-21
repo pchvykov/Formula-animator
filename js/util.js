@@ -10,7 +10,7 @@ function decimalToHexString(number)
 
 var toUnicodeSequence = function(code){
 	var orig = code.match(/@([0-9]*)/g);
-
+	if(orig == null) return code;
 	for(var i = 0; i < orig.length; i++){
 		var snum = orig[i].substring(1);
 		var hex = decimalToHexString(parseInt(snum));
@@ -26,7 +26,7 @@ var toUnicodeSequence = function(code){
 
 var toUnicodeCharacter = function(code){
 	var orig = code.match(/@([0-9]*)/g);
-	
+	if(orig == null) return code;
 	for(var i = 0; i < orig.length; i++){
 		var snum = orig[i].substring(1);
 		var dec = (parseInt(snum));
