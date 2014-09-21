@@ -7,13 +7,13 @@ var Formula = function(data){
 			MULT: {left:null, right:null,children:['left','right'],type:'op',op:'mult'},
 			DIV: {},
 			PAREN: {exp:null,children:['exp'],type:'op',op:'paren'},
-			ADD: {left:null, right:null,children:['left','right'],type:'op',op:'add'},
-			SUB: {left:null, right:null,children:['left','right'],type:'op',op:'sub'},
+			ADD: {left:null, right:null,children:['left','right'],type:'op',op:'plus'},
+			SUB: {left:null, right:null,children:['left','right'],type:'op',op:'minus'},
 			EXP: {},
 			EQ: {left:null, right:null,children:['left','right'],type:'op',op:'eq'}
 		},
-		VARIABLE: {},
-		NUMBER: {}
+		VARIABLE: {children:[], type:"variable", code:null, name:null},
+		NUMBER: { type:'number', children:[], code:null,value:null}
 
 
 	}
@@ -33,15 +33,15 @@ var Formula = function(data){
 		var that = this;
 		if(parent != null){
 			node.parent_id = parent.id;
-			node.parent = function(){
-				return that.get("#"+this.parent_id)[0];
-			}
+
 		}
 		else{
 			node.parent_id = null;
-			node.parent = function(){return null;}
 		}
-		node.parent = function(){return null;};
+		node.parent = function(){
+			if(this.parent_id != null) return that.get("#"+this.parent_id)[0];
+			else return null;
+		}
 		node.child = function(i){return this[this.children[i]]}
 		node.set = function(k,n){
 			this[k] = n;
@@ -57,7 +57,6 @@ var Formula = function(data){
 	}
 	this.create = function(type){
 		var TYPE = type.toUpperCase().split(".");
-		
 		var cdict = this.NODES;
 		for(var i=0; i < TYPE.length; i++){
 			cdict = cdict[TYPE[i]];
@@ -123,21 +122,24 @@ var Formula = function(data){
 		}
 		return results;
 	}
-	this.remove = function(target, child_to_moveup){
+	this.replace = function(target, newnode){
 		var par = target.parent();
-		var chld = target[child_to_moveup];
 		if(par != null){
 			for(var i=0; i < par.children.length; i++){
 				var key = par.children[i];
 				if(par.child(i).id == target.id){
-					par[key] = target[child_to_moveup];
-					chld.parent_id = par.id;
+					par[key] = newnode;
+					newnode.parent_id = par.id;
 				}
 			}
 		}
 		else{
-			this.data = chld;
+			this.data = newnode;
 		}
+	}
+	this.remove = function(target, child_to_moveup){
+		var chld = target[child_to_moveup];
+		this.replace(target,chld);
 	}
 	this.get = function(exp){
 		return this.subtree_get(exp, this.data);

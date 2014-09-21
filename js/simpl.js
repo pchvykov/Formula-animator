@@ -39,6 +39,69 @@ Transform = function(){
 }
 
 Transforms = {};
+
+Transform.SimplifyConstants = function(){
+	/*
+	params: term:XXX term:XXX
+	*/
+	this.test = function(params,node){
+		var factor = null
+		var terms = null;
+		//only operators and constants.
+		if(node.get('type:variable').length > 0)
+			return false;
+		//ensure all the desired terms are in it
+		if(params.hasOwnProperty('term')){
+			var t = params.term;
+			if (!(params.term instanceof Array)) t = [params.term];
+			for(var i=0; i < t.length; i++){
+				var res = node.get('#'+t[i]);
+				if(res.length == 0) return false;
+			}
+		}
+		return true;
+
+	}
+	this.find = function(filter, form){
+		var params = this.make_checker(filter);
+		var unfilt = form.get('type:op');
+		var result = [];
+		for(var i=0; i < unfilt.length; i++){
+			if(this.test(params,unfilt[i])){
+				result.push(unfilt[i]);
+			}
+		}
+		return result;
+	}
+	this.apply = function(node, form){
+		var evalexpr = function(n){
+			if(n.type == 'op'){
+				var args = {};
+				for(var i=0; i < n.children.length; i++){
+					args[n.children[i]] = evalexpr(n.child(i));
+				}
+				if(n.op == 'plus') return (args.left+args.right)
+				else if(n.op == 'minus') return (args.left-args.right)
+				else if(n.op == 'mult') return (args.left*args.right)
+				else if(n.op == 'div') return (args.top/args.bottom)
+				else if(n.op == 'exp') return Math.exp(args.base,args.exp)
+				else if(n.op == 'paren') return (args.exp)
+			}
+			else if(n.type == 'number'){
+				return n.value;
+			}
+		}
+		var finalval = evalexpr(node);
+		var newconst = form.create('number');
+		newconst.value = finalval;
+		newconst.code = ""+finalval;
+		form.replace(node, newconst);
+
+		
+	}
+}
+Transform.SimplifyConstants.prototype = new Transform();
+
 Transforms.Distribute = function(){
 
 	/*
