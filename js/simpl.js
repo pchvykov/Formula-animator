@@ -91,7 +91,7 @@ Transforms.SimplifyConstants = function(){
 				else if(n.op == 'minus') return (args.left-args.right)
 				else if(n.op == 'mult') return (args.left*args.right)
 				else if(n.op == 'div') return (args.top/args.bottom)
-				else if(n.op == 'exp') return Math.exp(args.base,args.exp)
+				else if(n.op == 'exp') return Math.pow(args.base,args.exp)
 				else if(n.op == 'paren') return (args.exp)
 			}
 			else if(n.type == 'number'){
