@@ -7,12 +7,15 @@
 // });
 
 // document.onselectstart = function(){ return false; }
-window.onload = function () {
+
+window.onload = function(){
     var holdid = -1,
         dropid = -1, 
         left = false,
-        exec = -1;
+        exec = -1,
+        form, delay, SVG;
 
+    
 // var tree = { "id": 29, "type": "op", "op": "eq", "code": "=", "left": 
 // { "id": 16, "type": "op", "op": "plus", "code": "+", "left": 
 // { "id": 3, "type": "number", "value": 5 }, "right": { "id": 15, "type": "number", "value": 6 } }, 
@@ -65,7 +68,7 @@ move = function (dx, dy, x) {
     forEl(this.parent, function(el) {
         el.attr({x: el.ox + dx, y: el.oy + dy})
     });
-    if(dropid !== -1 && dropid !== holdid && dropel.constructor.prototype == Raphael.el){
+    if(dropid != -1 && dropid != holdid && dropel.constructor.prototype == Raphael.el){
         left = x < dropel.attr("x") + dropel.getBBox().width / 5;
         console.log(left)
     }
@@ -79,20 +82,43 @@ up = function () {
     };
     console.log(holdid, dropid, left);
     holdid = -1;
+    clearTimeout(delay);
     // this.animate({r: 50, opacity: .5}, 500, ">");
-    
+
+    var rule = new Transforms.Distribute()
+    var results= rule.find('term:'+holdid.toString()+', term:'+dropid.toString(),form)
+    if (results.length > 1){console.log('multiple possibilities!!! choosing first one...')}
+    console.log(results, 'results')
+    rule.apply(results[0], form);
+    SVG.clear();
+    v = scan_tree(form.data, 0,SVG);
+    display_equation(v,[50,30]);
+    set_gui(v, form, SVG);   
 
 },
 over = function() {
 	this.attr({opacity: 0.7, cursor: "default"})
-    if (-1 !== holdid) { 
+    if (-1 != holdid) { 
         dropid = this.id;
-        dropel=this; 
+        dropel=this;
+        delay = setTimeout(function(){
+            var temp_form = form.clone();
+            // console.log(temp_form);
+            var rule = new Transforms.Distribute()
+            var results= rule.find('term:'+holdid.toString()+', term:'+dropid.toString(),temp_form)
+            if (results.length > 1){console.log('multiple possibilities!!! choosing first one...')}
+            console.log(results, 'results')
+            rule.apply(results[0], temp_form)
+            // console.log(form)
+        },5500);
     };
+    if(holdid == dropid){clearTimeout(delay);}
+
 },
 out = function() {
 	this.attr({opacity: 1})
     dropid = -1;
+    clearTimeout(delay);
 },
 dblcl = function() {
     exec = this.id;
@@ -110,7 +136,9 @@ dblcl = function() {
 // res.node.setAttribute("class","def")
 
 //==============================================
-set_gui = function(res){
+set_gui = function(res,formula, paper){
+    form = formula;
+    SVG = paper;
     // R.set(res).attr({"font-size": 55})
     res.drag(move, start, up);
     res.mouseover(over);
