@@ -29,6 +29,7 @@ $( document ).ready(function() {
     // rect.attr("fill", "#fff");
 
     $("#formula_latex").change(function(){
+        SVG.clear();
     	var data = $("#formula_latex").val().substr();
     	form = parser.parse(data);
     	var form_str = form.toString();

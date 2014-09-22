@@ -39,8 +39,9 @@ function create_node(inp, parent_set, paper){
 
 	if (inp.op != 'paren') { 
 		
-		text_object.data('code',inp.code);
 		text_object.id = inp.id; //Create a custom 'ID' attribute which saves the type of node and its ID
+		text_object.data('code', inp.code);
+		// console.log(text_object.data('code'));
 	} //Save symbol
 	text_object.parent = parent_set; //Create custom attribute which saves the parent node
 	
@@ -69,6 +70,7 @@ The output of this function is a set of Raphael objects. Each object has a numbe
 	}
 	// console.log(input, 'test');
 	parent_set.push(create_node(input, parent_set, paper));
+	// console.log(parent_set[0].data('code'))
 	if(input.type == 'op') //Not at a terminal node
 	{	
 		if(input.op == 'paren'){
@@ -97,6 +99,7 @@ The output of this function is a set of Raphael objects. Each object has a numbe
 			parent_set.push(right_set);
 		}
 	}
+	
 
 	return parent_set;
 }
