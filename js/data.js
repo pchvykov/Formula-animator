@@ -17,6 +17,9 @@ var Formula = function(data){
 
 
 	}
+	this.copy = function(){
+		return new Formula(this.data.copy());
+	}
 	this._build_data = function(d){
 		var that = this;
 		var link_vars = function(parent, node){
@@ -154,9 +157,6 @@ var Formula = function(data){
 	}
 	this.toString = function(){
 		return JSON.stringify(this.data,null,2);
-	}
-	this.copy = function(){
-		return JSON.parse(JSON.stringify(this.data,null,2));
 	}
 	this.print = function(){
 		var print_node =  function(n){
