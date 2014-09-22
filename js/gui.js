@@ -13,8 +13,9 @@ window.onload = function(){
         dropid = -1, 
         left = false,
         exec = -1,
-        form, delay, SVG;
+        form, delay, SVG, bubb = Raphael(0,0,1,1);
 
+    var rule = new Transforms.Distribute()
     
 // var tree = { "id": 29, "type": "op", "op": "eq", "code": "=", "left": 
 // { "id": 16, "type": "op", "op": "plus", "code": "+", "left": 
@@ -79,21 +80,29 @@ up = function () {
         forEl(this.parent, function(el) {
             el.attr({x: el.ox, y: el.oy})
         });
-    };
-    console.log(holdid, dropid, left);
+    }
+    else{
+        clearTimeout(delay);
+        bubb.clear();
+        console.log(holdid, dropid, left);
+
+        
+        var results= rule.find('term:'+holdid.toString()+', term:'+dropid.toString(),form)
+        if (results.length > 1){console.log('multiple possibilities!!! choosing first one...')}
+        // console.log(results, 'results')
+        rule.apply(results[0], form);
+
+        SVG.clear();
+        var v = scan_tree(form.data, 0,SVG);
+        display_equation(v,[50,30]);
+        set_gui(v, form, SVG);   
+    }
+    
     holdid = -1;
-    clearTimeout(delay);
+    
     // this.animate({r: 50, opacity: .5}, 500, ">");
 
-    var rule = new Transforms.Distribute()
-    var results= rule.find('term:'+holdid.toString()+', term:'+dropid.toString(),form)
-    if (results.length > 1){console.log('multiple possibilities!!! choosing first one...')}
-    console.log(results, 'results')
-    rule.apply(results[0], form);
-    SVG.clear();
-    v = scan_tree(form.data, 0,SVG);
-    display_equation(v,[50,30]);
-    set_gui(v, form, SVG);   
+    
 
 },
 over = function() {
@@ -102,15 +111,33 @@ over = function() {
         dropid = this.id;
         dropel=this;
         delay = setTimeout(function(){
-            var temp_form = form.clone();
+
+            //execute the proposed transformation:
+            var temp_form = form.copy();
             // console.log(temp_form);
-            var rule = new Transforms.Distribute()
+            // var rule = new Transforms.Distribute()
             var results= rule.find('term:'+holdid.toString()+', term:'+dropid.toString(),temp_form)
             if (results.length > 1){console.log('multiple possibilities!!! choosing first one...')}
-            console.log(results, 'results')
+            // console.log(results, 'results')
             rule.apply(results[0], temp_form)
-            // console.log(form)
-        },5500);
+
+            //Show transformation in the bubble:
+            xst = dropel.paper.canvas.offsetLeft+dropel.getBBox().x2+20;
+            yst = dropel.paper.canvas.offsetTop+dropel.getBBox().y2 +40;
+            bubb = Raphael(xst, yst, 500, 200);
+            var v = scan_tree(temp_form.data, 0,bubb);
+            display_equation(v,[10,10]);
+
+            //Change font of the bubble equation:
+            // bubb.setViewBox(xst,yst, 200,100,true);
+            var bot = bubb.bottom, res = []; 
+            while (bot) { 
+                 res.push(bot); 
+                 bot = bot.next; 
+            } 
+            bubb.set(res).attr({opacity: 0.4})
+
+        },500);
     };
     if(holdid == dropid){clearTimeout(delay);}
 
@@ -119,6 +146,7 @@ out = function() {
 	this.attr({opacity: 1})
     dropid = -1;
     clearTimeout(delay);
+    bubb.clear();
 },
 dblcl = function() {
     exec = this.id;
