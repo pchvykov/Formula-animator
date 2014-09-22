@@ -144,6 +144,7 @@ Transforms.Distribute = function(){
 	this.apply = function(node, form){
 		var factor;
 		var terms;
+		console.log('before');
 		if(node.right.type == 'op' && node.right.op == 'paren'){
 			factor = node.left;
 			terms = node.right;
@@ -152,9 +153,8 @@ Transforms.Distribute = function(){
 			factor = node.right;
 			terms = node.left;
 		}
+		console.log('initial replace');
 		form.replace(node, terms); // remove the parenthesis, replace with exp.
-		form.remove(terms, 'exp'); // remove the parenthesis, replace with exp.
-		
 		var findterms = function(n){
 			var args = [];
 			if(n.type == 'op' && 
@@ -175,15 +175,21 @@ Transforms.Distribute = function(){
 		console.log(args);
 		//multiply with each of the terms.
 		for(var i=0; i < args.length; i++){
+			console.log('starting');
 			var paren = form.create('op.paren');
 			var mul = form.create('op.mult');
+			console.log('copying')
 			var f = factor.copy();
+			var t = args[i].copy();
 			var term = args[i];
+			console.log('setting',mul, f);
 			//build subtree
 			mul.set('left',f);
 			mul.set('right',paren);
-			paren.set('exp',term.copy());
+			paren.set('exp',t);
+			console.log(term,mul);
 			form.replace(term, mul);
+			console.log(i,'done');
 		}
 		
 	}

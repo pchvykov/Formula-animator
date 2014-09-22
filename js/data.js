@@ -18,7 +18,9 @@ var Formula = function(data){
 
 	}
 	this.copy = function(){
-		return new Formula(this.data.copy());
+		var f = new Formula(null);
+		f.data = this.data.copy();
+		return f;
 	}
 	this._build_data = function(d){
 		var that = this;
@@ -31,16 +33,8 @@ var Formula = function(data){
 		}
 		link_vars(null,d);
 	}
-	this.__init_node = function(parent, node){
-		node.id = this.index;
+	this.__init_node_functions = function(node){
 		var that = this;
-		if(parent != null){
-			node.parent_id = parent.id;
-
-		}
-		else{
-			node.parent_id = null;
-		}
 		node.parent = function(){
 			if(this.parent_id != null){
 				return that.get("#"+this.parent_id)[0];
@@ -56,8 +50,27 @@ var Formula = function(data){
 			return that.subtree_get(k, this);
 		}
 		node.copy = function(){
-			return JSON.parse(JSON.stringify(this,null,2));
+			var build = function(n){
+				that.__init_node_functions(n);
+				for(var i=0; i < n.children.length; i++){
+					build(n.child(i));
+				}
+			}
+			var obj = JSON.parse(JSON.stringify(this,null,2));
+			build(obj);
+			return obj;
 		}
+	}
+	this.__init_node = function(parent, node){
+		node.id = this.index;
+		if(parent != null){
+			node.parent_id = parent.id;
+
+		}
+		else{
+			node.parent_id = null;
+		}
+		this.__init_node_functions(node);
 		this.index++;
 	}
 	this.create = function(type){
@@ -153,7 +166,7 @@ var Formula = function(data){
 	this.init = function(d){
 		this.index = 0;
 		this.data = d;
-		this._build_data(this.data);
+		if(this.data != null) this._build_data(this.data);
 	}
 	this.toString = function(){
 		return JSON.stringify(this.data,null,2);
