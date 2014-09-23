@@ -11,7 +11,8 @@ QUnit.test( "simpl.distribute", function( assert ) {
   test_trans('(b+c)*a', '', 0, '(a*(b)+a*(c))');
   test_trans('a*(b+c+d)', '', 0, '(a*(b)+a*(c)+a*(d))');
   test_trans('(a+q)*(b+c)', '', 0, '((a+q)*(b)+(a+q)*(c))');
-   test_trans('3*r+s+a+a*(b+c)', '', 0, '3*r+s+a+(a*(b)+a*(c))');
+  test_trans('3*r+s+a+a*(b+c)', '', 0, '3*r+s+a+(a*(b)+a*(c))');
+  test_trans('5*(4+3) = v','', 0, '(5*(4)+5*(3))=v')
 });
 
 QUnit.test( "simpl.const_eval", function( assert ) {
