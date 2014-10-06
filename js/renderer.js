@@ -140,3 +140,27 @@ function display_equation(parent_set,origin)
 		return coordinates_of_right_element;
 	}
 }
+
+
+//Does everything to display formula
+function draw_it(form, origin, gui_fl, R){
+	//Defaults:
+	//form - original eqaution tree
+	origin = typeof origin !== 'undefined' ? origin : [30,300]; //origin coord. in Paper (or in window)
+	gui_fl = typeof gui_fl !== 'undefined' ? gui_fl : false; //attach gui to object?
+	if(typeof R === 'undefined'){ //raphael paper to put it in (optional)
+		R = Raphael(origin[0], origin[1], 500, 50); 
+		origin = [10, 10];
+	}
+	
+	
+
+	R.canvas.style.backgroundColor = '#FFF';
+
+    var v = scan_tree(form.data, 0, R);
+    display_equation(v, origin);
+    if(gui_fl) {set_gui(v, form, R);}
+
+    //Return set of all objects in the paper
+    return v;
+}

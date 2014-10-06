@@ -35,11 +35,9 @@ $( document ).ready(function() {
     	var form_str = form.toString();
     	// $("#formula_latex_debug").html(form_str);
     	// console.log(form.data);
-        var v = scan_tree(form.data, 0,SVG);
-        // console.log(v)
-        display_equation(v,[50,30]);
 
-        set_gui(v, form, SVG);
+        var v = draw_it(form, [50,30], true, SVG)
+
     	/*
     	var srndr=$("#formula_render")
     	
@@ -57,3 +55,4 @@ $( document ).ready(function() {
 
    
 });
+

@@ -15,7 +15,7 @@ window.onload = function(){
         exec = -1,
         form, delay, SVG, bubb = Raphael(0,0,1,1);
 
-    var rule = new Transforms.Distribute()
+    
     
 // var tree = { "id": 29, "type": "op", "op": "eq", "code": "=", "left": 
 // { "id": 16, "type": "op", "op": "plus", "code": "+", "left": 
@@ -86,16 +86,16 @@ up = function () {
         bubb.clear();
         console.log(holdid, dropid, left);
 
-        
+        var rule = new Transforms.Distribute()
         var results= rule.find('term:'+holdid.toString()+', term:'+dropid.toString(),form)
         if (results.length > 1){console.log('multiple possibilities!!! choosing first one...')}
         // console.log(results, 'results')
         rule.apply(results[0], form);
 
         SVG.clear();
-        var v = scan_tree(form.data, 0,SVG);
-        display_equation(v,[50,30]);
-        set_gui(v, form, SVG);   
+
+        draw_it(form, [50,30], true, SVG)
+
     }
     
     holdid = -1;
@@ -111,31 +111,29 @@ over = function() {
         dropid = this.id;
         dropel=this;
         delay = setTimeout(function(){
-
             //execute the proposed transformation:
             var temp_form = form.copy();
+
             // console.log(temp_form);
             // var rule = new Transforms.Distribute()
+            var rule = new Transforms.Distribute();
             var results= rule.find('term:'+holdid.toString()+', term:'+dropid.toString(),temp_form)
             if (results.length > 1){console.log('multiple possibilities!!! choosing first one...')}
             // console.log(results, 'results')
+            
             rule.apply(results[0], temp_form)
-
+            draw_it(form);
+            
             //Show transformation in the bubble:
             xst = dropel.paper.canvas.offsetLeft+dropel.getBBox().x2+20;
             yst = dropel.paper.canvas.offsetTop+dropel.getBBox().y2 +40;
-            bubb = Raphael(xst, yst, 500, 200);
-            var v = scan_tree(temp_form.data, 0,bubb);
-            display_equation(v,[10,10]);
+            
+            var v = draw_it(temp_form, [xst, yst])
 
             //Change font of the bubble equation:
             // bubb.setViewBox(xst,yst, 200,100,true);
-            var bot = bubb.bottom, res = []; 
-            while (bot) { 
-                 res.push(bot); 
-                 bot = bot.next; 
-            } 
-            bubb.set(res).attr({opacity: 0.4})
+        
+            v.attr({opacity: 0.4})
 
         },500);
     };
