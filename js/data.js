@@ -12,7 +12,8 @@ var Node = function(f, handle, parent_id){
 						DIV: {base:{op:'div', code:'/'}, children:{}}, //top -> bottom, numerator to denominator
 						ADD: {base:{op:'plus', code:'+'}, children:{}},
 						SUB: {base:{op:'sub', code:'-'}, children:{}},
-						EQ: {base:{op:'eq', code:'='}, children:{}}
+						EQ: {base:{op:'eq', code:'='}, children:{}},
+						PAREN: {base:{op:'paren',code:'()', children:{}}}
 					}
 				},
 				VAR: {type:'variable', name:null},
@@ -68,6 +69,12 @@ var Node = function(f, handle, parent_id){
 	}
 	this.data = function(key){
 		return this._data[key];
+	}
+	this.set = function(key, value){
+		this._data[key] = value;
+	}
+	this.set_parent = function(id){
+		this.parent_id = id;
 	}
 	this.parent = function(f){
 		return f.get(this.parent_id);
@@ -159,7 +166,12 @@ var Formula = function(){
 		this.nodes = {};
 		this.ID = 0;
 	}
-
+	this.set_root = function(id){
+		this.root_id = id;
+	}
+	this.root = function(){
+		return this.get(this.root_id);
+	}
 	this.add = function(handle, parent_id){
 		var node = new Node(this, handle, parent_id);
 		this.nodes.append(node);
