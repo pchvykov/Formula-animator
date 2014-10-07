@@ -36,3 +36,11 @@ var toUnicodeCharacter = function(code){
 	console.log(code);
 	return code;
 }
+
+var copyData = function(d){
+  return JSON.parse(JSON.stringify(d,null,2));
+}
+
+var isUndefined = function(v){
+  return (v == undefined);
+}

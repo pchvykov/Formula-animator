@@ -1,199 +1,262 @@
 
 
-
-var Formula = function(data){
-	this.NODES = {
-		OP: {
-			MULT: {left:null, right:null,children:['left','right'],type:'op',code:'*',op:'mult'},
-			DIV: {},
-			PAREN: {exp:null,children:['exp'],type:'op',op:'paren'},
-			ADD: {left:null, right:null,children:['left','right'],type:'op',code:'+',op:'plus'},
-			SUB: {left:null, right:null,children:['left','right'],type:'op',code:'-',op:'minus'},
-			EXP: {},
-			EQ: {left:null, right:null,children:['left','right'],type:'op',code:'=',op:'eq'}
-		},
-		VARIABLE: {children:[], type:"variable", code:null, name:null},
-		NUMBER: { type:'number', children:[], code:null,value:null}
-
-
-	}
-	this.copy = function(){
-		var f = new Formula(null);
-		f.data = this.data.copy();
-		return f;
-	}
-	this._build_data = function(d){
-		var that = this;
-		var link_vars = function(parent, node){
-			that.__init_node(parent,node);
-			for(var i=0; i < node.children.length; i++){
-				link_vars(node, node.child(i));
+var Node = function(f, handle, parent_id){
+	//ids of children
+	this.NODE ={
+			base: {children:{}, type:'unknown', code:null, parent_id:null, id:null},
+			children: {
+				OP: {
+					base: {type:'op', code:'?', type:'unknown'},
+					children: {
+						MULT: {base:{op:'mult', code:'*'}, children:{}}, //
+						DIV: {base:{op:'div', code:'/'}, children:{}}, //top -> bottom, numerator to denominator
+						ADD: {base:{op:'plus', code:'+'}, children:{}},
+						SUB: {base:{op:'sub', code:'-'}, children:{}},
+						EQ: {base:{op:'eq', code:'='}, children:{}}
+					}
+				},
+				VAR: {type:'variable', name:null},
+				NUMBER: {type:'number', value:null}
 			}
-
-		}
-		link_vars(null,d);
 	}
-	this.__init_node_functions = function(node){
+	this.init = function(f,handle, parent_id){
 		var that = this;
-		node.parent = function(){
-			if(this.parent_id != null){
-				return that.get("#"+this.parent_id)[0];
+		var cobble_data = function(data,name){
+			var node = {}; //copy base info.
+			for(var b in data.base){
+				node[b] = copyData(data.base[b]);
 			}
-			else return null;
-		}
-		node.child = function(i){return this[this.children[i]]}
-		node.set = function(k,n){
-			this[k] = n;
-			n.parent_id = this.id;
-		}
-		node.get = function(k){
-			return that.subtree_get(k, this);
-		}
-		node.copy = function(){
-			var build = function(n){
-				that.__init_node_functions(n);
-				for(var i=0; i < n.children.length; i++){
-					build(n.child(i));
+			if(name == handle){ return {found:true, data:node};}
+			else{
+				for(child in data.children){
+					var res = cobble_data(data.children[child], child);
+					//copy returned structure.
+					if(res.found){
+						for(var k in res.data){
+							node[k] = res.data[k];
+						}
+						return {found:true, data:node}; //exists in one of our children.
+					}
 				}
 			}
-			var obj = JSON.parse(JSON.stringify(this,null,2));
-			build(obj);
-			return obj;
-		}
-	}
-	this.__init_node = function(parent, node){
-		node.id = this.index;
-		if(parent != null){
-			node.parent_id = parent.id;
+			//did not find this.
 
+			return {found:false, data:{}};
+		}
+		var data = cobble_data(this.NODES,'NODE');
+		this.HANDLE = handle;
+		data.id = f.fresh_id();
+		data.parent_id = id;
+		f.get(parent_id).children[data.id] = null;
+		this._data = data;
+		return data;
+	}
+	this.replace = function(f, new_id){
+		var par = this.parent();
+		if(par != null){
+			delete par[this.id];
+			par[new_id] = null;
+			f.get(new_id).parent_id = this.parent_id;
+			this.parent_id = -1;
 		}
 		else{
-			node.parent_id = null;
+			newnode.parent_id = -1;
 		}
-		this.__init_node_functions(node);
-		this.index++;
 	}
-	this.create = function(type){
-		var TYPE = type.toUpperCase().split(".");
-		var cdict = this.NODES;
-		for(var i=0; i < TYPE.length; i++){
-			cdict = cdict[TYPE[i]];
+	this.remove = function(f, child_to_moveup){
+		this.replace(f,child_to_moveup);
+	}
+	this.data = function(key){
+		return this._data[key];
+	}
+	this.parent = function(f){
+		return f.get(this.parent_id);
+	}
+	this.child = function(f,i){
+		return f.get(this.children[i]);
+	}
+	this.print = function(f){
+		if(this.type == 'op'){
+			for(var i=0; i < this.children.length; i++){
+				if(i > 0){
+					console.log(this.code);
+				}
+				console.log("(");
+				f.get(this.children[i]).print();
+				console.log(")");
+			}
 		}
-		var node = JSON.parse(JSON.stringify(cdict,null,2));
-		this.__init_node(null, node);
-		return node;
+		else if(type == 'variable'){
+			console.log(this.code);
+		}
+		else if(type == 'number'){
+			console.log(this.value);
+		}
+	}
+	/*
+	Given a formula, find all the ancestors.
+	*/
+	this.ancestors = function(f){
+		var ancestors = function(d){
+			var a = {};
+			for(var i=0; i < d.children; i++){
+				var child_id = d.children[i];
+				var child = f.get(child_id);
+				a[child_id] = child;
+
+				var anc = ancestors(child);
+				for(var ancestor in anc){
+					a[ancestor] = anc[ancestor];
+				}
+			}
+			return a;
+		}
+		return ancestors;
+
+	}
+	this.copy = function(f,parent){
+		var n = new Node(this.HANDLE, f.fresh_id(), parent);
+		n._data = copyData(this._data);
+		return n;
 	}
 
+	this.copy_subtree = function(f){
+		var anc = this.ancestors(f);
+		var mappings = {};
+		var nodes = {};
+		for(a in anc){
+			var el = anc[a].copy;
+			mappings[el.id] = f.fresh_id();
+			el.id = mappings[el.id];
+			nodes[el.id] = el;
+		}
+		for(a in anc){
+			var el = anc[a];
+			var pid = el.parent_id;
+			if(pid in mappings){
+				el.parent_id = mappings[pid];
+			}
+			else{
+				el.parent_id = -1;
+			}
+			for(var i=0; i < el.children.length; i++){
+				var cid = el.children[i];
+				if(cid in mappings){
+					el.children[i] = mappings[cid];
+				}
+				else{
+					el.children[i] = -1;
+				}
+			}
+		}
+		return nodes;
+	}
+	this.init(f,handle,parent_id);
+}
+var Formula = function(){
+
+	this.init = function(){
+		this.nodes = {};
+		this.ID = 0;
+	}
+
+	this.add = function(handle, parent_id){
+		var node = new Node(this, handle, parent_id);
+		this.nodes.append(node);
+	}
+	this.fresh_id = function(){
+		var id= this.ID;
+		this.ID++;
+		return id;
+	}
+	this.get = function(id){
+		return this.nodes[id];
+	}
+	this.copy = function(){
+		var f = new Formula();
+		f.nodes = copyData(this.nodes);
+		f.ID = this.ID;
+		return f;
+	}
+
+	this.init();
+
+
+
 	/*
-	#id : id number of a node
-	#field:val : field is a particular value
+	# #id : id number of a node
+	# field:val : field is a particular value
+	# %parent_id : is child of this parent.
+	# %%ancestor_id : is an ancestor of this parent.
 	# a b : a and b
 	# a,b : a or b
 	*/
 	this.to_checker = function(exp){
-		var isAnd = false;
+		var combine = function(a,b){return a||b};
 		var subexp = exp.split(",");
 		if(subexp.length == 1){
-			isAnd = true;
+			combine = function(a,b){return a&&b};
 			subexp = exp.split(' ');
 		}
-		var fxns = [];
-		var make_fxn = function(se){
-			if(se.charAt(0) == '#'){
-				//test id number
-				check_id = parseInt(se.substring(1))
-				return function(n){
-					if(n.id == check_id) return true
-					else return false;
-				}
+		var predicates = function(){return true;};
+		for(var i=0; i < subexp.length; i++){
+			var pred = subexp[i];
+			if(pred.startswith("#")){
+				var check_id = parseInt(se.substring(1))
+				var new_pred = function(comb,prev, checkid){
+					return function(node){return comb( prev(node), checkid==node.id) }
+				}(combine,predicates,check_id);
+				var predicates = new_pred;
+			}
+			else if(pred.startswith("%%")){
+				var check_id = parseInt(se.substring(2));
+				var anc = this.get(check_id).ancestors(this);
+				var new_pred = function(comb,prev, anc){
+					return function(node){return comb( prev(node), node.id in anc) }
+				}(combine,predicates,anc);
+				var predicates = new_pred;
+			}
+			else if(pred.startswith("%")){
+				var check_id = parseInt(se.substring(1));
+				var new_pred = function(comb,prev, checkid){
+					return function(node){return comb( prev(node), checkid==node.parent_id) }
+				}(combine,predicates,check_id);
+				var predicates = new_pred;
 			}
 			else {
 				var args = se.split(":");
 				var key = args[0];
 				var value = args[1];
-				return function(n){
-					if(n[key] == value) return true 
-					else return false;
-				}
+				var new_pred = function(comb,prev, key,value){
+					return function(node){return comb( prev(node), node.data(key) == value) }
+				}(combine,predicates,key, value);
+				var predicates = new_pred;
 			}
 		}
-		for(var i=0; i < subexp.length; i++){
-			fxns.push(make_fxn(subexp[i]));
-		}
-
-		return function(n){
-			var isTrue = true;
-			for(var i=0; i < fxns.length; i++){
-				if(isAnd) isTrue = isTrue && fxns[i](n);
-				else isTrue = isTrue || fxns[i](n);
-			}
-			return isTrue;
-		}
+		return predicates;
 	}
-	this.subtree_get = function(exp, n){
+	this.find = function(expr, from){
 		var checker = this.to_checker(exp);
-		var results = [];
-		if(checker(n)) results.push(n);
-		for(var i=0; i < n.children.length; i++){
-			var subres = this.subtree_get(exp, n.child(i));
-			results = results.concat(subres);
-		}
-		return results;
-	}
-	this.replace = function(target, newnode){
-		var par = target.parent();
-		if(par != null){
-			for(var i=0; i < par.children.length; i++){
-				var key = par.children[i];
-				if(par.child(i).id == target.id){
-					par[key] = newnode;
-					newnode.parent_id = par.id;
+		var nodes = {};
+		if(isUndefined(from)){
+				for(n in this.nodes){
+					nodes[n] = this.nodes[n];
 				}
-			}
 		}
 		else{
-			this.data = newnode;
-			newnode.parent_id = null;
+			nodes = from;
 		}
+		for(id in nodes){
+			if(!checker(nodes[id])){
+				delete nodes[id];
+			}
+		}
+		return nodes[id];
 	}
-	this.remove = function(target, child_to_moveup){
-		var chld = target[child_to_moveup];
-		this.replace(target,chld);
-	}
-	this.get = function(exp){
-		return this.subtree_get(exp, this.data);
-	}
-	this.init = function(d){
-		this.index = 0;
-		this.data = d;
-		if(this.data != null) this._build_data(this.data);
-	}
+
+
 	this.toString = function(){
-		return JSON.stringify(this.data,null,2);
+		return JSON.stringify(this.nodes,null,2);
 	}
-	this.print = function(){
-		var print_node =  function(n){
-			if(n.op == 'plus' || n.op == 'minus' || n.op == 'eq' ||
-				n.op == 'div' || n.op == 'mult'){
-				return print_node(n.left)+ n.code + print_node(n.right);
-			}
-			else if(n.op == 'div' || n.op == 'exp'){
-				return print_node(n.top)+ n.code + print_node(n.bottom);
-			}
-			else if(n.op == 'paren'){
-				return "("+print_node(n.exp)+")"
-			}
-			else if(n.type == 'variable'){
-				return  n.code;
-			}
-			else if(n.type == 'number'){
-				return n.code;
-			}
-			else{
-				console.log("ERROR:",n);
-			}
-		}
-		return print_node(this.data);
-	}
-	this.init(data);
+	this.init();
 }
