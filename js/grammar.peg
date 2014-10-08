@@ -24,10 +24,12 @@ start =
 
 
 exp "exp" =
-  t:paren { return t;}
-  / t:number { return t;}
-  / t:value { return t;}
+  t:exp1 { return t;}
 
+exp1 "exp1" =
+  t:paren { return t;}
+  / t:value { return t;}
+  / t:variable { return t;}
 
 number "number" =
    v:DECIMAL
@@ -54,8 +56,14 @@ paren "paren"
   = OPAREN e:exp CPAREN
     {
       var p = FORMULA.add('PAREN',-1);
-      e.set_parent(FORMULA, p.id);
+      e.set_parent(p.id);
       return p;
+    }
+
+multiply "multiply" =
+    MULT e:exp1
+    {
+      return e;
     }
 /*
 

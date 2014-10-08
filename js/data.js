@@ -1,6 +1,6 @@
 
 
-var Node = function(f, handle, parent_id){
+var Node = function(f, handle){
 	//ids of children
 	this.NODE ={
 			base: {type:'unknown', code:'?'},
@@ -20,7 +20,18 @@ var Node = function(f, handle, parent_id){
 				NUMBER: {base:{type:'number', value:null},children:{}}
 			}
 	}
-	this.init = function(f,handle, parent_id){
+	this.foreach_child = function(cbk){
+		var f = this.formula;
+		for(var i=0; i < this.children.length; i++){
+			cbk(f.get(this.children[i],i));
+		}
+	}
+	this.add_child = function(child_id, idx){
+		if(this.children.indexOf(child_id) < 0)
+			this.children.push(child_id);
+
+	}
+	this.init = function(f,handle){
 		var that = this;
 		var cobble_data = function(data,name){
 			var node = {}; //copy base info.
@@ -50,14 +61,14 @@ var Node = function(f, handle, parent_id){
 		var data = cobble_data(this.NODE,'NODE').data;
 		this.HANDLE = handle;
 		this.id = f.fresh_id();
-		this.parent_id = parent_id;
-		this.children = {};
-		if(f.has(parent_id))
-			f.get(parent_id).children[data.id] = this.id;
+		this.parent_id = -1;
+		this.children = [];
+		this.formula = f;
 		this._data = data;
 		return data;
 	}
-	this.replace = function(f, new_id){
+	this.replace = function(new_id){
+		var f = this.formula;
 		var par = this.parent();
 		if(par != null){
 			delete par[this.id];
@@ -69,8 +80,8 @@ var Node = function(f, handle, parent_id){
 			newnode.parent_id = -1;
 		}
 	}
-	this.remove = function(f, child_to_moveup){
-		this.replace(f,child_to_moveup);
+	this.remove = function(child_to_moveup){
+		this.replace(child_to_moveup);
 	}
 	this.data = function(key){
 		return this._data[key];
@@ -78,19 +89,23 @@ var Node = function(f, handle, parent_id){
 	this.set = function(key, value){
 		this._data[key] = value;
 	}
-	this.set_parent = function(f, id){
+	this.set_parent = function(id){
+		var f = this.formula;
 		this.parent_id = id;
 		if(f.has(id)){
-			f.get(id).children[this.id] = this.id;
+			f.get(id).add_child(this.id);
 		}
 	}
-	this.parent = function(f){
-		return f.get(this.parent_id);
+	this.parent = function(){
+		var f = this.formula;
+		return get(this.parent_id);
 	}
-	this.child = function(f,i){
+	this.child = function(i){
+		var f = this.formula;
 		return f.get(this.children[i]);
 	}
-	this.print = function(f){
+	this.print = function(){
+		var f = this.formula;
 		var str = "";
 		var type = this.data('type');
 		if(type == 'op'){
@@ -114,31 +129,36 @@ var Node = function(f, handle, parent_id){
 	/*
 	Given a formula, find all the ancestors.
 	*/
-	this.ancestors = function(f){
+	this.ancestors = function(){
+		var f = this.formula;
 		var ancestors = function(d){
 			var a = {};
-			for(var i=0; i < d.children; i++){
-				var child_id = d.children[i];
-				var child = f.get(child_id);
+			d.foreach_child(f,function(child){
+				var child_id = d.id;
 				a[child_id] = child;
 
 				var anc = ancestors(child);
 				for(var ancestor in anc){
 					a[ancestor] = anc[ancestor];
 				}
-			}
+			});
 			return a;
 		}
 		return ancestors;
 
 	}
-	this.copy = function(f,parent){
+	this.copy = function(parent){
+		var f = this.formula;
 		var n = new Node(this.HANDLE, f.fresh_id(), parent);
 		n._data = copyData(this._data);
 		return n;
 	}
+	this.set_formula = function(f){
+		this.formula = f;
+	}
 
-	this.copy_subtree = function(f){
+	this.copy_subtree = function(){
+		var f = this.formula;
 		var anc = this.ancestors(f);
 		var mappings = {};
 		var nodes = {};
@@ -157,19 +177,19 @@ var Node = function(f, handle, parent_id){
 			else{
 				el.parent_id = -1;
 			}
-			for(var i in el.children){
-				var cid = el.children[i];
+			this.foreach_child(f,function(child,i){
+				var cid = child.id;
 				if(cid in mappings){
 					el.children[i] = mappings[cid];
 				}
 				else{
 					el.children[i] = -1;
 				}
-			}
+			})
 		}
 		return nodes;
 	}
-	this.init(f,handle,parent_id);
+	this.init(f,handle);
 }
 var Formula = function(){
 
@@ -187,8 +207,8 @@ var Formula = function(){
 	this.root = function(){
 		return this.get(this.root_id);
 	}
-	this.add = function(handle, parent_id){
-		var node = new Node(this, handle, parent_id);
+	this.add = function(handle){
+		var node = new Node(this, handle);
 		this.nodes[node.id] = node;
 		return node;
 	}
