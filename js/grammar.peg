@@ -19,7 +19,7 @@ start =
   {
     FORMULA.set_root(e.id);
     cleanup();
-    return e;
+    return FORMULA;
   }
 
 
@@ -30,7 +30,8 @@ exp "exp" =
 
 
 number "number" =
-   v:DECIMAL {
+   v:DECIMAL
+  {
    var node = FORMULA.add('NUMBER',-1);
    node.set('code', ""+v);
    node.set('value',v);
@@ -38,7 +39,12 @@ number "number" =
   }
 
 variable "variable"
-  = v:LITERAL {return {id:getid(), children:[], type:"variable", code:v.sym, name:v.name}}
+  = v:LITERAL {
+   var node = FORMULA.add('VAR',-1);
+   node.set('code', ""+v.sym);
+   node.set('name',v.name);
+   return node;
+  }
 
 value "value"
   = n:number SEP* {return n;}
@@ -48,7 +54,7 @@ paren "paren"
   = OPAREN e:exp CPAREN
     {
       var p = FORMULA.add('PAREN',-1);
-      e.set_parent(p.id);
+      e.set_parent(FORMULA, p.id);
       return p;
     }
 /*
@@ -60,7 +66,6 @@ Basic Symbols
 DECIMAL "DECIMAL"
   = mant:[0-9]+"."dec:[0-9]+ {
       var v= mant.join("")+"."+dec.join("");
-      console.log(v);
       return parseFloat(v,10)
     }
   / digits:[0-9]+ {return parseInt(digits.join(""),10)}

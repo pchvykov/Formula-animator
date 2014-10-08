@@ -26,7 +26,7 @@ Parser = function(){
 		});
 	}
 	this.parse = function(text){
-		return new Formula(this.parser.parse(text));
+		return this.parser.parse(text);
 
 	}
 	this.init();

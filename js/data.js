@@ -3,10 +3,10 @@
 var Node = function(f, handle, parent_id){
 	//ids of children
 	this.NODE ={
-			base: {children:{}, type:'unknown', code:null, parent_id:null, id:null},
+			base: {type:'unknown', code:'?'},
 			children: {
 				OP: {
-					base: {type:'op', code:'?', type:'unknown'},
+					base: {type:'op', code:'?', type:'op', op:'unknown'},
 					children: {
 						MULT: {base:{op:'mult', code:'*'}, children:{}}, //
 						DIV: {base:{op:'div', code:'/'}, children:{}}, //top -> bottom, numerator to denominator
@@ -16,8 +16,8 @@ var Node = function(f, handle, parent_id){
 						PAREN: {base:{op:'paren',code:'()', children:{}}}
 					}
 				},
-				VAR: {type:'variable', name:null},
-				NUMBER: {type:'number', value:null}
+				VAR: {base:{type:'variable', name:null},children:{}},
+				NUMBER: {base:{type:'number', value:null},children:{}}
 			}
 	}
 	this.init = function(f,handle, parent_id){
@@ -27,16 +27,19 @@ var Node = function(f, handle, parent_id){
 			for(var b in data.base){
 				node[b] = copyData(data.base[b]);
 			}
-			if(name == handle){ return {found:true, data:node};}
+			if(name == handle){
+				return {found:true, data:node};
+			}
 			else{
 				for(child in data.children){
 					var res = cobble_data(data.children[child], child);
 					//copy returned structure.
 					if(res.found){
-						for(var k in res.data){
-							node[k] = res.data[k];
+						for(var k in node){
+							if(!(k in res.data))
+								res.data[k] = node[k];
 						}
-						return {found:true, data:node}; //exists in one of our children.
+						return {found:true, data:res.data}; //exists in one of our children.
 					}
 				}
 			}
@@ -44,11 +47,13 @@ var Node = function(f, handle, parent_id){
 
 			return {found:false, data:{}};
 		}
-		var data = cobble_data(this.NODES,'NODE');
+		var data = cobble_data(this.NODE,'NODE').data;
 		this.HANDLE = handle;
-		data.id = f.fresh_id();
-		data.parent_id = id;
-		f.get(parent_id).children[data.id] = null;
+		this.id = f.fresh_id();
+		this.parent_id = parent_id;
+		this.children = {};
+		if(f.has(parent_id))
+			f.get(parent_id).children[data.id] = this.id;
 		this._data = data;
 		return data;
 	}
@@ -73,8 +78,11 @@ var Node = function(f, handle, parent_id){
 	this.set = function(key, value){
 		this._data[key] = value;
 	}
-	this.set_parent = function(id){
+	this.set_parent = function(f, id){
 		this.parent_id = id;
+		if(f.has(id)){
+			f.get(id).children[this.id] = this.id;
+		}
 	}
 	this.parent = function(f){
 		return f.get(this.parent_id);
@@ -83,22 +91,25 @@ var Node = function(f, handle, parent_id){
 		return f.get(this.children[i]);
 	}
 	this.print = function(f){
-		if(this.type == 'op'){
-			for(var i=0; i < this.children.length; i++){
-				if(i > 0){
-					console.log(this.code);
-				}
-				console.log("(");
-				f.get(this.children[i]).print();
-				console.log(")");
+		var str = "";
+		var type = this.data('type');
+		if(type == 'op'){
+			for(var i in this.children){
+				var chl = f.get(this.children[i]);
+				console.log(chl);
+				str += (this.data('code'));
+				str += ("(");
+				str += chl.print(f);
+				str += (")");
 			}
 		}
 		else if(type == 'variable'){
-			console.log(this.code);
+			str = this.data('code');
 		}
 		else if(type == 'number'){
-			console.log(this.value);
+			str = (this.data('code'));
 		}
+		return str;
 	}
 	/*
 	Given a formula, find all the ancestors.
@@ -146,7 +157,7 @@ var Node = function(f, handle, parent_id){
 			else{
 				el.parent_id = -1;
 			}
-			for(var i=0; i < el.children.length; i++){
+			for(var i in el.children){
 				var cid = el.children[i];
 				if(cid in mappings){
 					el.children[i] = mappings[cid];
@@ -165,6 +176,10 @@ var Formula = function(){
 	this.init = function(){
 		this.nodes = {};
 		this.ID = 0;
+		this.root_id = -1;
+	}
+	this.has = function(id){
+		return (id in this.nodes);
 	}
 	this.set_root = function(id){
 		this.root_id = id;
@@ -174,7 +189,8 @@ var Formula = function(){
 	}
 	this.add = function(handle, parent_id){
 		var node = new Node(this, handle, parent_id);
-		this.nodes.append(node);
+		this.nodes[node.id] = node;
+		return node;
 	}
 	this.fresh_id = function(){
 		var id= this.ID;
@@ -190,10 +206,6 @@ var Formula = function(){
 		f.ID = this.ID;
 		return f;
 	}
-
-	this.init();
-
-
 
 	/*
 	# #id : id number of a node
@@ -269,6 +281,9 @@ var Formula = function(){
 
 	this.toString = function(){
 		return JSON.stringify(this.nodes,null,2);
+	}
+	this.print = function(){
+		return this.root().print(this);
 	}
 	this.init();
 }
