@@ -86,6 +86,9 @@ var Node = function(f, handle){
 			newnode.parent_id = -1;
 		}
 	}
+	this.childAt = function(i){
+		return this.children[i];
+	}
 	this.remove = function(child_to_moveup){
 		this.replace(child_to_moveup);
 	}

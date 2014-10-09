@@ -4,7 +4,7 @@ import SocketServer
 import os
  
 os.chdir('../')
-PORT = 8000
+PORT = 8080
  
 Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
 httpd = SocketServer.TCPServer(("", PORT), Handler)

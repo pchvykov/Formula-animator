@@ -42,7 +42,7 @@ start =
 
 
 exp "exp" =
-  t:PEDMAS { return t;}
+  t:PEDMASEQ { return t;}
 
 P "P" =
   t:paren { return t;}
@@ -69,6 +69,9 @@ PEDMAS "PEDMAS" =
   t:sub {return t;}
   / t:PEDMA {return t;}
 
+PEDMASEQ "PEDMASEQ" = 
+  t:eq {return t;}
+  / t:PEDMAS {return t;}
 
 number "number" =
    v:DECIMAL { return create_term({code:(""+v), value:v}, "NUMBER"); }
@@ -104,6 +107,10 @@ plus "plus" =
 sub "sub" =
     e:PEDMA m:MINUS p:sub { return append_op(p,e); }
     / e1:PEDMA m:MINUS e2:PEDMA { return create_op([e1,e2], 'SUB'); }
+
+eq "eq" =
+    e:PEDMAS m:EQUALS p:eq { return append_op(p,e); }
+    / e1:PEDMAS m:EQUALS e2:PEDMAS { return create_op([e1,e2], 'EQ'); }
 /*
 
 Basic Symbols
@@ -142,6 +149,7 @@ MULT "MULT"
 
 DIV "DIV"
 = "\\frac"SEP* {return ""}
+/ "/" {return ""}
 
 PLUS "PLUS"
 = "\\plus"SEP* {return "+"}
