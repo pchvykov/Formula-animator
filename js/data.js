@@ -204,10 +204,11 @@ var Node = function(f, handle){
 		return a;
 
 	}
-	this.copy = function(parent){
-		var f = this.formula;
-		var n = new Node(this.HANDLE, f.fresh_id(), parent);
+	this.copy = function(nf){ // copy into potentially new Formula
+		var n = nf.add(this.HANDLE);
 		n._data = copyData(this._data);
+		n.children = copyData(this.children);
+		n.parent_id = this.parent_id;
 		return n;
 	}
 	this.set_formula = function(f){
@@ -224,33 +225,35 @@ var Node = function(f, handle){
 		var f = this.formula;
 		return f.find(expr, this.ancestors());
 	}
-	this.copy_subtree = function(){
+	this.copy_subtree = function(nf){ //copy into potentially new tree
 		var f = this.formula;
-		var anc = this.ancestors(f);
+		var anc = this.ancestors();
 		var mappings = {};
 		var nodes = {};
+		//copy all elements
 		for(a in anc){
-			var el = anc[a].copy;
-			mappings[el.id] = f.fresh_id();
-			el.id = mappings[el.id];
+			var el = anc[a].copy(nf);
+			mappings[anc[a].id] = el.id;
 			nodes[el.id] = el;
 		}
-		for(a in anc){
-			var el = anc[a];
-			var pid = el.parent_id;
-			if(pid in mappings){
-				el.parent_id = mappings[pid];
+		if(this.id == f.root().id){
+			nf.set_root(mappings[this.id]);
+		}
+		console.log("nodes");
+		for(var nid in nodes){
+			var n = nodes[nid];
+			if(n.parent_id in mappings){
+				n.parent_id = mappings[n.parent_id];
 			}
 			else{
-				el.parent_id = -1;
+				n.parent_id = -1;
 			}
-			this.foreach_child(f,function(child,i){
-				var cid = child.id;
-				if(cid in mappings){
-					el.children[i] = mappings[cid];
+			n.foreach_child(function(child,i){
+				if(child.id in mappings){
+					n.children[i] = child.id;
 				}
 				else{
-					el.children[i] = -1;
+					n.children[i] = -1;
 				}
 			})
 		}
@@ -290,8 +293,7 @@ var Formula = function(){
 	}
 	this.copy = function(){
 		var f = new Formula();
-		f.nodes = copyData(this.nodes);
-		f.ID = this.ID;
+		this.root().copy_subtree(f);
 		return f;
 	}
 
@@ -405,32 +407,12 @@ var Formula = function(){
 	}
 	this.cleanup = function(){
 		var tree = this.root().ancestors();
-		var cnt = 0;
-		var mapping = {};
 		//initialize to 0
 		for(var id in this.nodes){
 			if(! (id in tree)){
 				delete this.nodes[id];
 			}
-			else{
-				mapping[id] = cnt;
-				cnt++;
-			}
 		}
-		for(var id in this.nodes){
-			var node = this.nodes[id];
-			node.id = mapping[node.id];
-			node.parent_id = mapping[node.parent_id];
-			for(var i=0; i < node.children.length; i++){
-				node.children[i] = mapping[node.children[i]];
-			}
-			delete this.nodes[id];
-			this.nodes[mapping[id]] = node;
-
-
-		}
-		this.root_id = mapping[this.root_id];
-		this.ID = cnt;
 
 	}
 	this.init();
