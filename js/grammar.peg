@@ -10,7 +10,7 @@
   };
   var FORMULA = new Formula();
   var cleanup = function(){
-
+    FORMULA.cleanup();
   }
   var append_op = function(p, e){
     e.set_parent(p.id,true);

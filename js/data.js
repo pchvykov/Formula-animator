@@ -141,8 +141,8 @@ var Node = function(f, handle){
 		var f = this.formula;
 		var ancestors = function(d){
 			var a = {};
-			d.foreach_child(f,function(child){
-				var child_id = d.id;
+			d.foreach_child(function(child){
+				var child_id = child.id;
 				a[child_id] = child;
 
 				var anc = ancestors(child);
@@ -152,7 +152,9 @@ var Node = function(f, handle){
 			});
 			return a;
 		}
-		return ancestors;
+		var a = ancestors(this);
+		a[this.id] = this;
+		return a;
 
 	}
 	this.copy = function(parent){
@@ -164,7 +166,13 @@ var Node = function(f, handle){
 	this.set_formula = function(f){
 		this.formula = f;
 	}
-
+	this.foreach_subtree = function(cbk){
+		cbk(this);
+		this.foreach_child(function(node){
+			cbk(node);
+			node.foreach_subtree(node);
+		});
+	}
 	this.copy_subtree = function(){
 		var f = this.formula;
 		var anc = this.ancestors(f);
@@ -312,6 +320,36 @@ var Formula = function(){
 	}
 	this.print = function(){
 		return this.root().print(this);
+	}
+
+	this.cleanup = function(){
+		var tree = this.root().ancestors();
+		var cnt = 0;
+		var mapping = {};
+		//initialize to 0
+		for(var id in this.nodes){
+			if(! (id in tree)){
+				delete this.nodes[id];
+			}
+			else{
+				mapping[id] = cnt;
+				cnt++;
+			}
+		}
+		for(var id in this.nodes){
+			var node = this.nodes[id];
+			node.id = mapping[node.id];
+			node.parent_id = mapping[node.parent_id];
+			for(var i=0; i < node.children.length; i++){
+				node.children[i] = mapping[node.children[i]];
+			}
+			this.nodes[mapping[id]] = node;
+			delete this.nodes[id];
+
+		}
+		this.root_id = mapping[this.root_id];
+		this.ID = cnt;
+
 	}
 	this.init();
 }
