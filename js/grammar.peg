@@ -11,7 +11,7 @@
   var STATS = {};
   var FORMULA = new Formula();
   var cleanup = function(){
-    FORMULA.cleanup();
+    FORMULA.cleanup_and_reassign();
   }
   var append_op = function(p, e){
     e.set_parent(p.id,true);

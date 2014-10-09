@@ -21,10 +21,43 @@ var Node = function(f, handle){
 				NUMBER: {base:{type:'number', value:null},children:{}}
 			}
 	}
+	this.eval = function(){
+		var type = this.data('type');
+		var op = this.data('op');
+		switch(type){
+			case 'variable':
+				return this.data('name');
+			case 'number':
+				return this.data('value');
+			case 'op':
+				switch(op){
+					case 'plus': var ex = function(a,b){return a+b}; break;
+					case 'mult': var ex = function(a,b){return a*b}; break;
+					case 'div': var ex = function(a,b){return a/b}; break;
+					case 'sub': var ex = function(a,b){return a-b}; break;
+					case 'power': var ex = function(a,b){return pow(a,b)}; break;
+					case 'eq': var ex = function(a,b){return a}; break;
+					case 'paren': var ex = function(a,b){return a}; break;
+				}
+				var res;
+				for(var i=1; i < this.children.length; i++){
+					if(i == 1){
+						var res = ex(this.child(0).eval(), this.child(1).eval());
+					}
+					else{
+						var res = ex(res, this.child(i).eval());
+					}
+				}
+				if(this.children.length == 1){
+					var res = this.childAt(0).eval();
+				}
+				return res;
+		}
+	}
 	this.foreach_child = function(cbk){
 		var f = this.formula;
 		for(var i=0; i < this.children.length; i++){
-			cbk(f.get(this.children[i],i));
+			cbk(f.get(this.children[i]),i);
 		}
 	}
 	this.add_child = function(child_id, tofront){
@@ -77,17 +110,23 @@ var Node = function(f, handle){
 		var f = this.formula;
 		var par = this.parent();
 		if(par != null){
-			delete par[this.id];
-			par[new_id] = null;
+			var vid = this.id;
+			par.foreach_child(function(c,i){
+				if(c.id == vid){
+					console.log(i,c.print())
+					par.children[i] = new_id;
+				}
+			})
 			f.get(new_id).parent_id = this.parent_id;
 			this.parent_id = -1;
 		}
 		else{
-			newnode.parent_id = -1;
+			f.get(new_id).parent_id = -1;
+			if(f.root().id == this.id){
+				f.set_root(new_id);
+			}
 		}
-	}
-	this.childAt = function(i){
-		return this.children[i];
+		return this;
 	}
 	this.remove = function(child_to_moveup){
 		this.replace(child_to_moveup);
@@ -101,13 +140,14 @@ var Node = function(f, handle){
 	this.set_parent = function(id,tofront){
 		var f = this.formula;
 		this.parent_id = id;
-		if(f.has(id)){
-			f.get(id).add_child(this.id,tofront);
+		var par = f.get(id);
+		if(par != null){
+			par.add_child(this.id,tofront);
 		}
 	}
 	this.parent = function(){
 		var f = this.formula;
-		return get(this.parent_id);
+		return f.get(this.parent_id);
 	}
 	this.child = function(i){
 		var f = this.formula;
@@ -180,6 +220,10 @@ var Node = function(f, handle){
 			node.foreach_subtree(node);
 		});
 	}
+	this.find = function(expr){
+		var f = this.formula;
+		return f.find(expr, this.ancestors());
+	}
 	this.copy_subtree = function(){
 		var f = this.formula;
 		var anc = this.ancestors(f);
@@ -241,7 +285,8 @@ var Formula = function(){
 		return id;
 	}
 	this.get = function(id){
-		return this.nodes[id];
+		if(this.has(id)) return this.nodes[id];
+		else return null;
 	}
 	this.copy = function(){
 		var f = new Formula();
@@ -262,20 +307,20 @@ var Formula = function(){
 		var combine = function(a,b){return a||b};
 		var subexp = exp.split(",");
 		if(subexp.length == 1){
-			combine = function(a,b){return a&&b};
+			var combine = function(a,b){return a&&b};
 			subexp = exp.split(' ');
 		}
 		var predicates = function(){return true;};
 		for(var i=0; i < subexp.length; i++){
 			var pred = subexp[i];
-			if(pred.startswith("#")){
+			if(pred.startsWith("#")){
 				var check_id = parseInt(se.substring(1))
 				var new_pred = function(comb,prev, checkid){
 					return function(node){return comb( prev(node), checkid==node.id) }
 				}(combine,predicates,check_id);
 				var predicates = new_pred;
 			}
-			else if(pred.startswith("%%")){
+			else if(pred.startsWith("%%")){
 				var check_id = parseInt(se.substring(2));
 				var anc = this.get(check_id).ancestors(this);
 				var new_pred = function(comb,prev, anc){
@@ -283,7 +328,7 @@ var Formula = function(){
 				}(combine,predicates,anc);
 				var predicates = new_pred;
 			}
-			else if(pred.startswith("%")){
+			else if(pred.startsWith("%")){
 				var check_id = parseInt(se.substring(1));
 				var new_pred = function(comb,prev, checkid){
 					return function(node){return comb( prev(node), checkid==node.parent_id) }
@@ -291,18 +336,18 @@ var Formula = function(){
 				var predicates = new_pred;
 			}
 			else {
-				var args = se.split(":");
+				var args = pred.split(":");
 				var key = args[0];
 				var value = args[1];
-				var new_pred = function(comb,prev, key,value){
+				var new_pred = (function(comb,prev, key,value){
 					return function(node){return comb( prev(node), node.data(key) == value) }
-				}(combine,predicates,key, value);
+				})(combine,predicates,key, value);
 				var predicates = new_pred;
 			}
 		}
 		return predicates;
 	}
-	this.find = function(expr, from){
+	this.find = function(exp, from){
 		var checker = this.to_checker(exp);
 		var nodes = {};
 		if(isUndefined(from)){
@@ -318,7 +363,7 @@ var Formula = function(){
 				delete nodes[id];
 			}
 		}
-		return nodes[id];
+		return nodes;
 	}
 
 
@@ -329,6 +374,35 @@ var Formula = function(){
 		return this.root().print(this);
 	}
 
+	this.cleanup_and_reassign = function(){
+		var tree = this.root().ancestors();
+		var cnt = 0;
+		var mapping = {};
+		//initialize to 0
+		for(var id in this.nodes){
+			if(! (id in tree)){
+				delete this.nodes[id];
+			}
+			else{
+				mapping[id] = cnt;
+				cnt++;
+			}
+		}
+		for(var id in this.nodes){
+			var node = this.nodes[id];
+			node.id = mapping[node.id];
+			node.parent_id = mapping[node.parent_id];
+			for(var i=0; i < node.children.length; i++){
+				node.children[i] = mapping[node.children[i]];
+			}
+			delete this.nodes[id];
+			this.nodes[mapping[id]] = node;
+
+
+		}
+		this.root_id = mapping[this.root_id];
+		this.ID = cnt;
+	}
 	this.cleanup = function(){
 		var tree = this.root().ancestors();
 		var cnt = 0;
@@ -352,6 +426,7 @@ var Formula = function(){
 			}
 			delete this.nodes[id];
 			this.nodes[mapping[id]] = node;
+
 
 		}
 		this.root_id = mapping[this.root_id];

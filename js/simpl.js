@@ -55,7 +55,7 @@ Transforms.SimplifyConstants = function(){
 		var factor = null
 		var terms = null;
 		//only operators and constants.
-		if(node.get('type:variable').length > 0)
+		if(node.find('type:variable').length > 0)
 			return false;
 		//ensure all the desired terms are in it
 		if(params.hasOwnProperty('term')){
@@ -71,9 +71,9 @@ Transforms.SimplifyConstants = function(){
 	}
 	this.find = function(filter, form){
 		var params = this.make_checker(filter);
-		var unfilt = form.get('type:op');
+		var unfilt = form.find('type:op');
 		var result = [];
-		for(var i=0; i < unfilt.length; i++){
+		for(var i in unfilt){
 			if(this.test(params,unfilt[i])){
 				result.push(unfilt[i]);
 			}
@@ -81,28 +81,12 @@ Transforms.SimplifyConstants = function(){
 		return result;
 	}
 	this.apply = function(node, form){
-		var evalexpr = function(n){
-			if(n.type == 'op'){
-				var args = {};
-				for(var i=0; i < n.children.length; i++){
-					args[n.children[i]] = evalexpr(n.child(i));
-				}
-				if(n.op == 'plus') return (args.left+args.right)
-				else if(n.op == 'minus') return (args.left-args.right)
-				else if(n.op == 'mult') return (args.left*args.right)
-				else if(n.op == 'div') return (args.top/args.bottom)
-				else if(n.op == 'exp') return Math.pow(args.base,args.exp)
-				else if(n.op == 'paren') return (args.exp)
-			}
-			else if(n.type == 'number'){
-				return n.value;
-			}
-		}
-		var finalval = evalexpr(node);
-		var newconst = form.create('number');
-		newconst.value = finalval;
-		newconst.code = ""+finalval;
-		form.replace(node, newconst);
+		var finalval = node.eval();
+
+		var newconst = form.add('NUMBER');
+		newconst.set('value', finalval);
+		newconst.set('code', ""+finalval);
+		node.replace(newconst.id);
 
 		
 	}
