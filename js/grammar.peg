@@ -21,7 +21,7 @@
     if(!(m in STATS))
         STATS[m] = 0;
     STATS[m]+=1;
-
+    console.log(e,m);
     var p = FORMULA.add(m);
     for(var i=0; i < e.length; i++){
       e[i].set_parent(p.id);
@@ -59,37 +59,59 @@ start =
     return FORMULA;
   }
 
+//expanded for performance purposes
 
 exp "exp" =
   t:PEDMASEQ { return t;}
 
 P "P" =
   t:paren { return t;}
-  / t:value {return t;}
+  /t:value {return t;}
 
 PE "PE" = 
-  t:expo {return t;}
-  / t:P {return t;}
+  t:paren {return t;}
+  /t:expo {return t;}
+  /t:value {return t;}
 
 PED "PED" = 
-  t:div {return t;}
-  / t:PE {return t;}
+  t:paren {return t;}
+  /t:expo {return t;}
+  /t:div {return t;}
+  /t:value {return t;}
 
 PEDM "PEDM" = 
-  t:mult {return t;}
-  / t:PED {return t;}
+  t:paren {return t;}
+  /t:expo {return t;}
+  /t:div {return t;}
+  /t:mult {return t;}
+  /t:value {return t;}
 
 PEDMA "PEDMA" = 
-  t:plus {return t;}
-  / t:PEDM {return t;}
+  t:paren {return t;}
+  /t:expo {return t;}
+  /t:div {return t;}
+  /t:mult {return t;}
+  /t:plus {return t;}
+  /t:value {return t;}
 
 PEDMAS "PEDMAS" = 
-  t:sub {return t;}
-  / t:PEDMA {return t;}
+  t:paren {return t;}
+  /t:expo {return t;}
+  /t:div {return t;}
+  /t:mult {return t;}
+  /t:plus {return t;}
+  /t:sub {return t;}
+  /t:value {return t;}
 
 PEDMASEQ "PEDMASEQ" = 
   t:eq {return t;}
-  / t:PEDMAS {return t;}
+  /t:paren {return t;}
+  /t:expo {return t;}
+  /t:div {return t;}
+  /t:mult {return t;}
+  /t:plus {return t;}
+  /t:sub {return t;}
+  /t:value {return t;}
 
 number "number" =
    v:DECIMAL { return create_term({code:(""+v), value:v}, "NUMBER"); }
@@ -98,11 +120,11 @@ variable "variable" =
    v:LITERAL { return create_term({code:(""+v.sym), name:v.name}, "VAR"); }
 
 value "value" =
-   n:number {return n;}
-  / v:variable {return v;}
+   v:variable {return v;}
+   / n:number {return n;}
 
 paren "paren" =
-    OPAREN e:PEDMAS CPAREN { return create_op([e], "PAREN"); }
+    OPAREN e:PEDMAS CPAREN  { return create_op([e], "PAREN"); }
 
 expo "expo" =
     e:P m:EXP p:expo { return append_op(p,e); }

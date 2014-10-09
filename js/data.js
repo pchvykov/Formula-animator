@@ -118,10 +118,10 @@ var Node = function(f, handle){
 		var str = "";
 		var type = this.data('type');
 		var op = this.data('op');
-		if(type == op && op == "paren"){
+		if(type == "op" && op == "paren"){
 			var chl = f.get(this.children[0]);
 			str += "(";
-			str += chl.print(f);
+			str += chl.print();
 			str += ")";
 		}
 		else if(type == 'op'){
@@ -130,7 +130,7 @@ var Node = function(f, handle){
 				if(i > 0){
 					str += (this.data('code'));
 				}
-				str += chl.print(f);
+				str += chl.print();
 			}
 		}
 		else if(type == 'variable'){
@@ -350,8 +350,8 @@ var Formula = function(){
 			for(var i=0; i < node.children.length; i++){
 				node.children[i] = mapping[node.children[i]];
 			}
-			this.nodes[mapping[id]] = node;
 			delete this.nodes[id];
+			this.nodes[mapping[id]] = node;
 
 		}
 		this.root_id = mapping[this.root_id];
