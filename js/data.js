@@ -117,7 +117,14 @@ var Node = function(f, handle){
 		var f = this.formula;
 		var str = "";
 		var type = this.data('type');
-		if(type == 'op'){
+		var op = this.data('op');
+		if(type == op && op == "paren"){
+			var chl = f.get(this.children[0]);
+			str += "(";
+			str += chl.print(f);
+			str += ")";
+		}
+		else if(type == 'op'){
 			for(var i in this.children){
 				var chl = f.get(this.children[i]);
 				if(i > 0){

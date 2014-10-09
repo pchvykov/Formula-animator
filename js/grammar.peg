@@ -8,6 +8,7 @@
     "beta":"946",
     "gamma": "947",
   };
+  var STATS = {};
   var FORMULA = new Formula();
   var cleanup = function(){
     FORMULA.cleanup();
@@ -17,6 +18,10 @@
     return p;
   }
   var create_op = function(e,m){
+    if(!(m in STATS))
+        STATS[m] = 0;
+    STATS[m]+=1;
+
     var p = FORMULA.add(m);
     for(var i=0; i < e.length; i++){
       e[i].set_parent(p.id);
@@ -25,10 +30,23 @@
   }
   var create_term = function(dict,m){
     var node = FORMULA.add(m);
+    if(!(m in STATS))
+      STATS[m] = 0;
+    STATS[m]+=1;
     for(var d in dict){
       node.set(d, dict[d]);
     }
     return node;
+  }
+  var print_stats = function(){
+    var total = 0;
+    for( k in STATS){
+      console.log(k, ":", STATS[k],'\n');
+      total += STATS[k];
+    }
+    console.log("--------\n");
+    console.log("TOTAL:", total,"\n");
+    console.log("--------\n");
   }
 }
 
@@ -37,6 +55,7 @@ start =
   {
     FORMULA.set_root(e.id);
     cleanup();
+    print_stats();
     return FORMULA;
   }
 
@@ -46,8 +65,7 @@ exp "exp" =
 
 P "P" =
   t:paren { return t;}
-  / t:value { return t;}
-  / t:variable { return t;}
+  / t:value {return t;}
 
 PE "PE" = 
   t:expo {return t;}
@@ -84,8 +102,7 @@ value "value" =
   / v:variable {return v;}
 
 paren "paren" =
-    OPAREN e:exp CPAREN
-    { return create_op([e], "PAREN"); }
+    OPAREN e:PEDMAS CPAREN { return create_op([e], "PAREN"); }
 
 expo "expo" =
     e:P m:EXP p:expo { return append_op(p,e); }
