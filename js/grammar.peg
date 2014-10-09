@@ -12,6 +12,24 @@
   var cleanup = function(){
 
   }
+  var append_op = function(p, e){
+    e.set_parent(p.id,true);
+    return p;
+  }
+  var create_op = function(e,m){
+    var p = FORMULA.add(m);
+    for(var i=0; i < e.length; i++){
+      e[i].set_parent(p.id);
+    }
+    return p;
+  }
+  var create_term = function(dict,m){
+    var node = FORMULA.add(m);
+    for(var d in dict){
+      node.set(d, dict[d]);
+    }
+    return node;
+  }
 }
 
 start =
@@ -24,62 +42,83 @@ start =
 
 
 exp "exp" =
-  t:exp1 { return t;}
+  t:PEDMAS { return t;}
 
-exp1 "exp1" =
+P "P" =
   t:paren { return t;}
   / t:value { return t;}
   / t:variable { return t;}
 
+PE "PE" = 
+  t:expo {return t;}
+  / t:P {return t;}
+
+PED "PED" = 
+  t:div {return t;}
+  / t:PE {return t;}
+
+PEDM "PEDM" = 
+  t:mult {return t;}
+  / t:PED {return t;}
+
+PEDMA "PEDMA" = 
+  t:plus {return t;}
+  / t:PEDM {return t;}
+
+PEDMAS "PEDMAS" = 
+  t:sub {return t;}
+  / t:PEDMA {return t;}
+
+
 number "number" =
-   v:DECIMAL
-  {
-   var node = FORMULA.add('NUMBER',-1);
-   node.set('code', ""+v);
-   node.set('value',v);
-   return node;
-  }
+   v:DECIMAL { return create_term({code:(""+v), value:v}, "NUMBER"); }
 
-variable "variable"
-  = v:LITERAL {
-   var node = FORMULA.add('VAR',-1);
-   node.set('code', ""+v.sym);
-   node.set('name',v.name);
-   return node;
-  }
+variable "variable" =
+   v:LITERAL { return create_term({code:(""+v.sym), name:v.name}, "VAR"); }
 
-value "value"
-  = n:number SEP* {return n;}
-  / v:variable SEP* {return v;}
+value "value" =
+   n:number {return n;}
+  / v:variable {return v;}
 
-paren "paren"
-  = OPAREN e:exp CPAREN
-    {
-      var p = FORMULA.add('PAREN',-1);
-      e.set_parent(p.id);
-      return p;
-    }
+paren "paren" =
+    OPAREN e:exp CPAREN
+    { return create_op([e], "PAREN"); }
 
-multiply "multiply" =
-    MULT e:exp1
-    {
-      return e;
-    }
+expo "expo" =
+    e:P m:EXP p:expo { return append_op(p,e); }
+    / e1:P m:EXP e2:P { return create_op([e1,e2], 'EXPO'); }
+
+
+div "div" =
+    e:PE m:DIV p:div { return append_op(p,e); }
+    / e1:PE m:DIV e2:PE { return create_op([e1,e2], 'DIV'); }
+
+mult "mult" =
+    e:PED m:MULT p:mult { return append_op(p,e); }
+    / e1:PED m:MULT e2:PED { return create_op([e1,e2], 'MULT'); }
+
+plus "plus" =
+    e:PEDM m:PLUS p:plus { return append_op(p,e); }
+    / e1:PEDM m:PLUS e2:PEDM { return create_op([e1,e2], 'ADD'); }
+
+sub "sub" =
+    e:PEDMA m:MINUS p:sub { return append_op(p,e); }
+    / e1:PEDMA m:MINUS e2:PEDMA { return create_op([e1,e2], 'SUB'); }
 /*
 
 Basic Symbols
 
 */
 
-DECIMAL "DECIMAL"
-  = mant:[0-9]+"."dec:[0-9]+ {
+DECIMAL "DECIMAL" =
+   mant:[0-9]+"."dec:[0-9]+ SEP* {
       var v= mant.join("")+"."+dec.join("");
       return parseFloat(v,10)
     }
-  / digits:[0-9]+ {return parseInt(digits.join(""),10)}
+  / digits:[0-9]+ SEP* {return parseInt(digits.join(""),10)}
 
-LITERAL "LITERAL"
-  = l:[A-Za-z]+
+LITERAL "LITERAL" =
+   l:[A-Za-z]+ SEP*
     {
       var name = l.join("");
       var sym = name;

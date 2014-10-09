@@ -12,6 +12,7 @@ var Node = function(f, handle){
 						DIV: {base:{op:'div', code:'/'}, children:{}}, //top -> bottom, numerator to denominator
 						ADD: {base:{op:'plus', code:'+'}, children:{}},
 						SUB: {base:{op:'sub', code:'-'}, children:{}},
+						EXPO: {base:{op:'power', code:'^'}, children:{}},
 						EQ: {base:{op:'eq', code:'='}, children:{}},
 						PAREN: {base:{op:'paren',code:'()', children:{}}}
 					}
@@ -26,10 +27,15 @@ var Node = function(f, handle){
 			cbk(f.get(this.children[i],i));
 		}
 	}
-	this.add_child = function(child_id, idx){
-		if(this.children.indexOf(child_id) < 0)
-			this.children.push(child_id);
-
+	this.add_child = function(child_id, tofront){
+		if(isUndefined(tofront) || ! tofront){
+			if(this.children.indexOf(child_id) < 0)
+				this.children.push(child_id);
+		}
+		else {
+			if(this.children.indexOf(child_id) < 0)
+				this.children.unshift(child_id);
+		}
 	}
 	this.init = function(f,handle){
 		var that = this;
@@ -89,11 +95,11 @@ var Node = function(f, handle){
 	this.set = function(key, value){
 		this._data[key] = value;
 	}
-	this.set_parent = function(id){
+	this.set_parent = function(id,tofront){
 		var f = this.formula;
 		this.parent_id = id;
 		if(f.has(id)){
-			f.get(id).add_child(this.id);
+			f.get(id).add_child(this.id,tofront);
 		}
 	}
 	this.parent = function(){
@@ -111,7 +117,6 @@ var Node = function(f, handle){
 		if(type == 'op'){
 			for(var i in this.children){
 				var chl = f.get(this.children[i]);
-				console.log(chl);
 				str += (this.data('code'));
 				str += ("(");
 				str += chl.print(f);
