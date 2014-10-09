@@ -21,7 +21,6 @@
     if(!(m in STATS))
         STATS[m] = 0;
     STATS[m]+=1;
-    console.log(e,m);
     var p = FORMULA.add(m);
     for(var i=0; i < e.length; i++){
       e[i].set_parent(p.id);
@@ -48,6 +47,14 @@
     console.log("TOTAL:", total,"\n");
     console.log("--------\n");
   }
+  var handle_regex = function(first, rest){
+    var handle = [first];
+    for(var i=0; i < rest.length; i++){
+      handle.push(rest[i][1]);
+    }
+    return handle;
+  }
+
 }
 
 start =
@@ -62,55 +69,60 @@ start =
 //expanded for performance purposes
 
 exp "exp" =
-  t:PEDMASEQ { return t;}
+  t:PEDMASEQ {return t;}
+
 
 P "P" =
-  t:paren { return t;}
+  t:paren {return t;}
   /t:value {return t;}
 
 PE "PE" = 
-  t:paren {return t;}
-  /t:expo {return t;}
+  t:expo {return t;}
+  /t:paren {return t;}
   /t:value {return t;}
 
+
 PED "PED" = 
-  t:paren {return t;}
+  t:div {return t;}
   /t:expo {return t;}
-  /t:div {return t;}
+  /t:paren {return t;}
   /t:value {return t;}
 
 PEDM "PEDM" = 
-  t:paren {return t;}
-  /t:expo {return t;}
+  t:mult {return t;}
   /t:div {return t;}
-  /t:mult {return t;}
+  /t:expo {return t;}
+  /t:paren {return t;}
   /t:value {return t;}
 
 PEDMA "PEDMA" = 
-  t:paren {return t;}
-  /t:expo {return t;}
-  /t:div {return t;}
+  t:plus {return t;}
   /t:mult {return t;}
-  /t:plus {return t;}
+  /t:div {return t;}
+  /t:expo {return t;}
+  /t:paren {return t;}
   /t:value {return t;}
 
 PEDMAS "PEDMAS" = 
-  t:paren {return t;}
-  /t:expo {return t;}
-  /t:div {return t;}
-  /t:mult {return t;}
+  t:sub {return t;}
   /t:plus {return t;}
-  /t:sub {return t;}
+  /t:mult {return t;}
+  /t:div {return t;}
+  /t:expo {return t;}
+  /t:paren {return t;}
   /t:value {return t;}
+  
+  
+  
 
 PEDMASEQ "PEDMASEQ" = 
   t:eq {return t;}
-  /t:paren {return t;}
-  /t:expo {return t;}
-  /t:div {return t;}
-  /t:mult {return t;}
-  /t:plus {return t;}
   /t:sub {return t;}
+  /t:plus {return t;}
+  /t:mult {return t;}
+  /t:div {return t;}
+  /t:expo {return t;}
+  /t:paren {return t;}
   /t:value {return t;}
 
 number "number" =
@@ -127,29 +139,23 @@ paren "paren" =
     OPAREN e:PEDMAS CPAREN  { return create_op([e], "PAREN"); }
 
 expo "expo" =
-    e:P m:EXP p:expo { return append_op(p,e); }
-    / e1:P m:EXP e2:P { return create_op([e1,e2], 'EXPO'); }
+    e1:P e2:(EXP P)+ { return create_op(handle_regex(e1,e2), 'EXPO'); }
 
 
 div "div" =
-    e:PE m:DIV p:div { return append_op(p,e); }
-    / e1:PE m:DIV e2:PE { return create_op([e1,e2], 'DIV'); }
+    e1:PE e2:(DIV PE)+ { return create_op(handle_regex(e1,e2), 'DIV'); }
 
 mult "mult" =
-    e:PED m:MULT p:mult { return append_op(p,e); }
-    / e1:PED m:MULT e2:PED { return create_op([e1,e2], 'MULT'); }
+    e1:PED e2:(MULT PED)+ { return create_op(handle_regex(e1,e2), 'MULT'); }
 
 plus "plus" =
-    e:PEDM m:PLUS p:plus { return append_op(p,e); }
-    / e1:PEDM m:PLUS e2:PEDM { return create_op([e1,e2], 'ADD'); }
+    e1:PEDM e2:(PLUS PEDM)+ { return create_op(handle_regex(e1,e2), 'ADD'); }
 
 sub "sub" =
-    e:PEDMA m:MINUS p:sub { return append_op(p,e); }
-    / e1:PEDMA m:MINUS e2:PEDMA { return create_op([e1,e2], 'SUB'); }
+    e1:PEDMA e2:(MINUS PEDMA)+ { return create_op(handle_regex(e1,e2), 'SUB'); }
 
 eq "eq" =
-    e:PEDMAS m:EQUALS p:eq { return append_op(p,e); }
-    / e1:PEDMAS m:EQUALS e2:PEDMAS { return create_op([e1,e2], 'EQ'); }
+    e1:PEDMAS e2:(EQUALS PEDMAS)+ { return create_op(handle_regex(e1,e2), 'EQ'); }
 /*
 
 Basic Symbols
