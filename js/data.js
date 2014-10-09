@@ -120,10 +120,10 @@ var Node = function(f, handle){
 		if(type == 'op'){
 			for(var i in this.children){
 				var chl = f.get(this.children[i]);
-				str += (this.data('code'));
-				str += ("(");
+				if(i > 0){
+					str += (this.data('code'));
+				}
 				str += chl.print(f);
-				str += (")");
 			}
 		}
 		else if(type == 'variable'){
