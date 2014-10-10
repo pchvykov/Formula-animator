@@ -86,7 +86,7 @@ var Node = function(f, handle){
 		}
 	}
 	this.n_children = function(){
-		return this.children.length();
+		return this.children.length;
 	}
 	this.remove_child = function(j){
 		var f = this.formula;
