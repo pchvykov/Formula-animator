@@ -26,7 +26,7 @@ var Node = function(f, handle){
 		var op = this.data('op');
 		switch(type){
 			case 'variable':
-				return this.data('name');
+				return null;
 			case 'number':
 				return this.data('value');
 			case 'op':
@@ -40,12 +40,19 @@ var Node = function(f, handle){
 					case 'paren': var ex = function(a,b){return a}; break;
 				}
 				var res;
-				for(var i=1; i < this.children.length; i++){
-					if(i == 1){
-						var res = ex(this.child(0).eval(), this.child(1).eval());
+				for(var i=0; i < this.children.length; i++){
+					if(i == 0){
+						var e = this.child(i).eval();
+						while(e == null){
+							e = this.child(i).eval();
+							i++;
+						}
+						var res = e;
 					}
 					else{
-						var res = ex(res, this.child(i).eval());
+						var e = this.child(i).eval();
+						if(e != null)
+							res = ex(res, e);
 					}
 				}
 				if(this.children.length == 1){

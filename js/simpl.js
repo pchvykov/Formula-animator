@@ -257,56 +257,6 @@ Transforms.Distribute = function(){
 		//remove the source from the products.
 		src.remove();
 		form.cleanup();
-		/*
-		console.log('before');
-		if(node.right.type == 'op' && node.right.op == 'paren'){
-			factor = node.left;
-			terms = node.right;
-		}
-		else if(node.left.type =='op' && node.left.op == 'paren'){
-			factor = node.right;
-			terms = node.left;
-		}
-		console.log('initial replace');
-		form.replace(node, terms); // remove the parenthesis, replace with exp.
-		var findterms = function(n){
-			var args = [];
-			if(n.type == 'op' && 
-				(n.op == 'plus' || n.op == 'minus'))
-			{
-				args= args.concat(findterms(n.left));
-				args = args.concat(findterms(n.right));
-			}
-			else if(n.type == 'op' && n.op == "paren"){
-				args = findterms(n.exp);
-			}
-			else{
-				args.push(n);
-			}
-			return args;
-		}
-		var args = findterms(terms);
-		console.log(args);
-		//multiply with each of the terms.
-		for(var i=0; i < args.length; i++){
-			console.log('starting');
-			var paren = form.create('op.paren');
-			var mul = form.create('op.mult');
-			console.log('copying')
-			var f = factor.copy();
-			var t = args[i].copy();
-			var term = args[i];
-			console.log('setting',mul, f);
-			//build subtree
-			mul.set('left',f);
-			mul.set('right',paren);
-			paren.set('exp',t);
-			console.log(term,mul);
-			form.replace(term, mul);
-			console.log(i,'done');
-		}
-		*/
-		
 	}
 	this.init();
 };
