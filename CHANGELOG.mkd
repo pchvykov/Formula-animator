@@ -1,0 +1,17 @@
+# Changelog
+1. Reworked data-structure to use flat n-node operations.
+2. Added formula, node convenience functions for traversal, insertion, removal, evaluation, copying, getting ancestors, copying subtrees, etc
+3. Added cleanup operations for removing unused nodes.
+4. Reworked transformations to return TransformResults objects with print,get,foreach functions.
+5. Reworked core transformation application
+6. Distribute transformation now supports src,dest filters and returns possible simplifications in distance-order
+7. Drastically optimized parser to make n-node structure feasible
+8. added parser benchmarking support to track parser performance for complex expressions
+
+# Todo
+1. Update test-cases for simplification.
+2. Add expression removal, replacement test cases.
+
+# Applying my Changes
+1. Option 1: give me the ok to merge with main, which would likely break everyone's code on pull
+2. Option 2: I post instructions for how to work in your own local branch
