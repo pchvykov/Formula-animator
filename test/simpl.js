@@ -20,16 +20,10 @@ QUnit.test( "simpl.const_eval", function( assert ) {
   	var form = parser.parse(expr);	
   	var rule = new Transforms.SimplifyConstants();
   	var res = rule.find(search,form);
+    res.print();
   	rule.apply(res.get(idx),form);
   	assert.equal(form.print(), key, "ceval  with "+search+" on result "+idx+" : "+expr +
   		 "=>"+form.print() + " (expected: \""+key+"\")");
-  }
-  function test_trans_len(expr,search){
-  	var form = parser.parse(expr);	
-  	var rule = new Transforms.SimplifyConstants();
-  	var res = rule.find(search,form);
-  	console.log(res.length > 0);
-  	assert.ok((res.length > 0),  "ceval  with "+search+" : "+expr +' => solution exists');
   }
   test_trans('4+5', '', 0, '9');
   test_trans('4-5', '', 0, '-1');
@@ -37,8 +31,6 @@ QUnit.test( "simpl.const_eval", function( assert ) {
   test_trans('4/5', '', 0, '0.8');
   test_trans('2^5', '', 0, '32');
   
-  test_trans_len('x*2*5', '');
-  test_trans('x*2*5', '', 0, 'x*10');
-  test_trans_len('2*5*x', '');
-  test_trans('2*5*x', '', 0, 'x*10');
+  test_trans('x*2*5', '', 0, '10*x');
+  test_trans('2*5*x', '', 0, '10*x');
 });

@@ -47,6 +47,7 @@ var Node = function(f, handle){
 							e = this.child(i).eval();
 							i++;
 						}
+						if(i > 1) i--;
 						var res = e;
 					}
 					else{

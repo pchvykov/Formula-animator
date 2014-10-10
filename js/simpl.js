@@ -53,21 +53,41 @@ Transforms.SimplifyConstants = function(){
 	*/
 	this.init = function(){
 		this.SimplifyConstantsSearchResults = function(){
-			this.data = [];
-			this.add = function(r){
-				this.data.push(r);
+			this.data = {};
+			this.add = function(r,chl){
+				var len = 0;
+				var res = r.find('type:number');
+				for(var q in res){
+					len++;
+				}
+				if(!this.data.hasOwnProperty(len)){
+					this.data[len] = [];
+				}
+				this.data[len].push({node:r,children:chl});
 			}
 			this.print = function(){
-				for(var r = 0; r < this.data.length; r++){
-					console.log("> ", this.data[r].print());
+				for(var q in this.data){
+					console.log("Number Constants: ",q);
+					for(var r = 0; r < this.data[q].length; r++){
+						console.log("> ", this.data[q][r].node.print());
+					}
 				}
 			}
 			this.get = function(i){
-				return this.data[i];
+				var k=0;
+				for(var q in this.data){
+					for(var r = 0; r < this.data[q].length; r++){
+						if(i == k) return this.data[q][r];
+						k++;
+					}
+				}
+				return null;
 			}
 			this.foreach = function(cbk){
-				for(var r=0; r < this.data.length; r++){
-					cbk(this.data[r], r);
+				for(var q in this.data){
+					for(var r=0; r < this.data[q].length; r++){
+						cbk(this.data[q][r].node, this.data[q][r].children, (q), r);
+					}
 				}
 			}
 		}
@@ -75,19 +95,31 @@ Transforms.SimplifyConstants = function(){
 	this.test = function(params,node){
 		var factor = null
 		var terms = null;
-		//only operators and constants.
-		if(node.find('type:variable').length > 0)
-			return false;
+		var numbers = [];
+		node.foreach_child(function(c){
+			if(c.data('type') == 'number'){
+				numbers.push(c);
+			}
+			else if(c.data('type') == 'op'){
+				var res = c.find('type:variable'); //if the child
+				var cnt = 0;
+				for(var r in res){
+					cnt++;
+				}
+				if(cnt == 0) numbers.push(c);
+			}
+		})
+		if(numbers.length < 1) return {ok:false, children:numbers, node:node};
 		//ensure all the desired terms are in it
 		if(params.hasOwnProperty('term')){
 			var t = params.term;
 			if (!(params.term instanceof Array)) t = [params.term];
 			for(var i=0; i < t.length; i++){
 				var res = node.find("#"+t[i]);
-				if(res.length == 0) return false;
+				if(res.length == 0) return {ok:false, children:numbers, node:node};
 			}
 		}
-		return true;
+		return {ok:true, children:numbers, node:node};
 
 	}
 	this.find = function(filter, form){
@@ -95,19 +127,34 @@ Transforms.SimplifyConstants = function(){
 		var unfilt = form.find('type:op');
 		var result = new this.SimplifyConstantsSearchResults();
 		for(var i in unfilt){
-			if(this.test(params,unfilt[i])){
-				result.add(unfilt[i]);
+			var r = this.test(params,unfilt[i]);
+			if(r.ok){
+				result.add(r.node, r.children);
 			}
 		}
 		return result;
 	}
-	this.apply = function(node){
+	this.apply = function(res){
+		var node = res.node;
+		var children = res.children;
+
 		var finalval = node.eval();
 		var form = node.get_formula();
 		var newconst = form.add('NUMBER');
 		newconst.set('value', finalval);
 		newconst.set('code', ""+finalval);
-		node.replace(newconst.id);
+		console.log(finalval);
+		if(children.length == node.children.length){
+			node.replace(newconst.id);
+		}
+		else{
+			for(var i=0; i < children.length; i++){
+				//remove child with this id.
+				children[i].remove();
+			}
+			node.add_child(newconst.id, true);
+
+		}
 		form.cleanup();
 		
 	}
