@@ -96,6 +96,9 @@ var Node = function(f, handle){
 				this.children.unshift(child_id);
 		}
 	}
+	this.n_children = function(){
+		return this.children.length;
+	}
 	this.remove_child = function(j){
 		var f = this.formula;
 		if(j >= 0) this.children.splice(j,1); // removes that child.

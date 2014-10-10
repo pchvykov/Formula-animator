@@ -36,7 +36,7 @@ function original_scan_tree(input) //Sarah gives me the Raphael paper
 function create_node(inp, parent_set, paper){
 	
 	text_object = paper.text(); //Create text object
-	text_object.attr({'text-anchor': 'start'});
+	// text_object.attr({'text-anchor': 'start'});
 	if (inp.data('op') != 'paren') { 
 		
 		text_object.id = inp.get_id(); //Create a custom 'ID' attribute which saves the type of node and its ID
@@ -48,70 +48,111 @@ function create_node(inp, parent_set, paper){
 	return text_object;
 }
 
-function scan_tree(input, parent_set, paper) //This is the third version of the scan_tree function. It is different in that instead of outputing a set of objects, it outputs a set of sets.
-/*
-This function scans a 'tree object' (provided by Sarah) and then generates Raphael or SVG text objects that have various attributes. Function is recursive.
-Inputs are:
--> input: This is the 'tree object' provided by Sarah's parsing function. It should be noted that the current function will only work correctly if the input tree object propagates 'left'. This means that all 'right' branches must be terminal nodes.
--> parent_set: This is the parent_set object that will be passed around. When the function is being called for the first time, put a zero (0) at this point
--> parent_node: This is the parent node text object containing information about a 'parent node'. The information is useful while examininig and defining attributes of a corresponding 'child node'
--> root_node_position: This passes the position of the root (fundamental) text element on the SVG canvas so that all other child nodes can locate themselves relative to this root node.
--> paper: This is the SVG canvas.
+function scan_tree(input, paper) {
+	var node = input.root()
+	
 
-The output of this function is a set of Raphael objects. Each object has a number of standard and 'improvised' attributes.
-*/
-{
-	var root = input.root();
-	var visit_children = function(node, idx){
-
-		child.foreach_child(function(child, cidx){
-			visit_children(child,cidx);
-		})
-	}
-	root.foreach_child();
-	/*
-	if (parent_set == 0) //create a root_set if none has been defined
-	{
-		var parent_set = paper.set();
-		parent_set.data('level', 0);
-		scan_tree(input, parent_set, paper);
-		return parent_set;
-	}
-	// console.log(input, 'test');
-	parent_set.push(create_node(input, parent_set, paper));
-	// console.log(parent_set[0].code)
-	if(input.type == 'op') //Not at a terminal node
-	{	
-		if(input.op == 'paren'){
-			parent_set[0].code = '(';
-			parent_set[0].id = input.id;
-
-			var expr_set = paper.set();
-			expr_set.data('level',parent_set.data('level')+1) //Update level of this node
-			scan_tree(input.exp, expr_set, paper);
-			parent_set.push(expr_set);
-
-			parent_set.push(create_node(input,parent_set,paper));
-			parent_set[2].id = input.id+0.1;
-			parent_set[2].code = ')';
-			
-			// tt= parent_set
+	var visit_children = function(node, idx, pset){
+		if (node.n_children() == 0){
+			term=create_node(node, pset, paper);
+			pset.push(term);
 		}
-		else {
-			var left_set = paper.set();
-			left_set.data('level',parent_set.data('level')+1) //Update level of this node
-			scan_tree(input.left, left_set, paper);
-			parent_set.push(left_set);
-			var right_set = paper.set();
-			right_set.data('level',parent_set.data('level')+1) //Update level of this node
-			scan_tree(input.right, right_set, paper);
-			parent_set.push(right_set);
+		else{
+			var cset = paper.set();
+			pset.push(cset);
+
+			node.foreach_child(function(child, cidx){
+				visit_children(child,cidx,cset);
+			})
 		}
 	}
-	*/
-
-	return parent_set;
+	visit_children(node, 0, paper.set());
 }
+
+
+
+
+// function scan_tree(input, parent_set, paper) //This is the third version of the scan_tree function. It is different in that instead of outputing a set of objects, it outputs a set of sets.
+// /*
+// This function scans a 'tree object' (provided by Sarah) and then generates Raphael or SVG text objects that have various attributes. Function is recursive.
+// Inputs are:
+// -> input: This is the 'tree object' provided by Sarah's parsing function. It should be noted that the current function will only work correctly if the input tree object propagates 'left'. This means that all 'right' branches must be terminal nodes.
+// -> parent_set: This is the parent_set object that will be passed around. When the function is being called for the first time, put a zero (0) at this point
+// -> parent_node: This is the parent node text object containing information about a 'parent node'. The information is useful while examininig and defining attributes of a corresponding 'child node'
+// -> root_node_position: This passes the position of the root (fundamental) text element on the SVG canvas so that all other child nodes can locate themselves relative to this root node.
+// -> paper: This is the SVG canvas.
+
+// The output of this function is a set of Raphael objects. Each object has a number of standard and 'improvised' attributes.
+// */
+// {
+// 	var root = input.root();
+// 	if (parent_set == 0) //create a root_set if none has been defined
+// 	{
+// 		var parent_set = paper.set();
+// 		parent_set.data('level', 0);
+// 		visit_children(input, 0, parent_set);
+// 		return parent_set;
+// 	}
+// 	var visit_children = function(node, idx, pset){
+// 		var set = paper.set();
+// 		node.n_children()
+
+// 		left_set.data('level',parent_set.data('level')+1) //Update level of this node
+// 		scan_tree(input.left, left_set, paper);
+// 		parent_set.push(left_set);
+// 		var right_set = paper.set();
+// 		right_set.data('level',parent_set.data('level')+1) //Update level of this node
+// 		scan_tree(input.right, right_set, paper);
+// 		parent_set.push(right_set);
+
+// 		child.foreach_child(function(child, cidx){
+// 			visit_children(child,cidx,pset);
+// 		})
+// 	}
+
+// 	/*
+// 	if (parent_set == 0) //create a root_set if none has been defined
+// 	{
+// 		var parent_set = paper.set();
+// 		parent_set.data('level', 0);
+// 		scan_tree(input, parent_set, paper);
+// 		return parent_set;
+// 	}
+// 	// console.log(input, 'test');
+// 	parent_set.push(create_node(input, parent_set, paper));
+// 	// console.log(parent_set[0].code)
+// 	if(input.type == 'op') //Not at a terminal node
+// 	{	
+// 		if(input.op == 'paren'){
+// 			parent_set[0].code = '(';
+// 			parent_set[0].id = input.id;
+
+// 			var expr_set = paper.set();
+// 			expr_set.data('level',parent_set.data('level')+1) //Update level of this node
+// 			scan_tree(input.exp, expr_set, paper);
+// 			parent_set.push(expr_set);
+
+// 			parent_set.push(create_node(input,parent_set,paper));
+// 			parent_set[2].id = input.id+0.1;
+// 			parent_set[2].code = ')';
+			
+// 			// tt= parent_set
+// 		}
+// 		else {
+// 			var left_set = paper.set();
+// 			left_set.data('level',parent_set.data('level')+1) //Update level of this node
+// 			scan_tree(input.left, left_set, paper);
+// 			parent_set.push(left_set);
+// 			var right_set = paper.set();
+// 			right_set.data('level',parent_set.data('level')+1) //Update level of this node
+// 			scan_tree(input.right, right_set, paper);
+// 			parent_set.push(right_set);
+// 		}
+// 	}
+// 	*/
+
+// 	return parent_set;
+// }
 
 
 // var toRaphaelUnicode = function(t){return t.replace(/&#([0-9]*);/g, '\\u$1')}
@@ -166,7 +207,7 @@ function draw_it(form, origin, gui_fl, R){
 
 	R.canvas.style.backgroundColor = '#FFF';
 
-    var v = scan_tree(form.data, 0, R);
+    var v = scan_tree(form, R);
     display_equation(v, origin);
     if(gui_fl) {set_gui(v, form, R);}
 
