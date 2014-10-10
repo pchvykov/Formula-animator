@@ -35,7 +35,7 @@ var Node = function(f, handle){
 					case 'mult': var ex = function(a,b){return a*b}; break;
 					case 'div': var ex = function(a,b){return a/b}; break;
 					case 'sub': var ex = function(a,b){return a-b}; break;
-					case 'power': var ex = function(a,b){return pow(a,b)}; break;
+					case 'power': var ex = function(a,b){return Math.pow(a,b)}; break;
 					case 'eq': var ex = function(a,b){return a}; break;
 					case 'paren': var ex = function(a,b){return a}; break;
 				}
@@ -61,11 +61,7 @@ var Node = function(f, handle){
 				cbk(f.get(this.children[i]),i);
 		}
 	}
-	this.add_child_before = function(child_id, bef_id){
-		var j = -1;
-		this.foreach_child(function(c,i){
-			if(c.id == id) j = i;
-		});
+	this.add_child_before = function(child_id, j){
 		this.children.splice(j,0,child_id);
 	}
 	this.add_child = function(child_id, tofront){
@@ -78,12 +74,8 @@ var Node = function(f, handle){
 				this.children.unshift(child_id);
 		}
 	}
-	this.remove_child = function(id){
+	this.remove_child = function(j){
 		var f = this.formula;
-		var j = -1;
-		this.foreach_child(function(c,i){
-			if(c.id == id) j = i;
-		});
 		if(j >= 0) this.children.splice(j,1); // removes that child.
 	}
 	this.init = function(f,handle){
@@ -126,10 +118,8 @@ var Node = function(f, handle){
 		var f = this.formula;
 		var par = this.parent();
 		if(par != null){
-			console.log(par.children);
-			par.add_child_before(new_id, this.id);
-			par.remove_child(this.id);
-			console.log(par.children);
+			par.add_child_before(new_id, par.get_index(this.id));
+			par.remove_child(par.get_index(this.id));
 			this.parent_id = -1;
 			f.get(new_id).parent_id = this.parent_id;
 		}
@@ -144,7 +134,7 @@ var Node = function(f, handle){
 	this.remove = function(child_to_moveup){
 		if(isUndefined(child_to_moveup)){
 			var par = this.parent();
-			par.remove_child(this.id);
+			par.remove_child(par.get_index(this.id));
 			this.parent_id = -1;
 		}
 		else
@@ -250,6 +240,12 @@ var Node = function(f, handle){
 	this.find = function(expr){
 		var f = this.formula;
 		return f.find(expr, this.ancestors());
+	}
+	this.get_index = function(id){
+		for(var i=0; i < this.children.length;i++){
+			if(this.children[i] == id) return i;
+		}
+		return -1;
 	}
 	this.copy_subtree = function(nf){ //copy into potentially new tree
 		var f = this.formula;

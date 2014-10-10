@@ -55,7 +55,7 @@ Transforms.SimplifyConstants = function(){
 		this.SimplifyConstantsSearchResults = function(){
 			this.data = [];
 			this.add = function(r){
-				data.push(r);
+				this.data.push(r);
 			}
 			this.print = function(){
 				for(var r = 0; r < this.data.length; r++){
@@ -83,14 +83,14 @@ Transforms.SimplifyConstants = function(){
 			var t = params.term;
 			if (!(params.term instanceof Array)) t = [params.term];
 			for(var i=0; i < t.length; i++){
-				var res = node.get('#'+t[i]);
+				var res = node.find("#"+t[i]);
 				if(res.length == 0) return false;
 			}
 		}
 		return true;
 
 	}
-	this.find = function(filter){
+	this.find = function(filter, form){
 		var params = this.make_checker(filter);
 		var unfilt = form.find('type:op');
 		var result = new this.SimplifyConstantsSearchResults();
@@ -111,6 +111,7 @@ Transforms.SimplifyConstants = function(){
 		form.cleanup();
 		
 	}
+	this.init();
 }
 Transforms.SimplifyConstants.prototype = new Transform();
 
@@ -239,10 +240,10 @@ Transforms.Distribute = function(){
 			})
 		}
 		else if(dest_op == "sub" || dest_op == "plus"){
-			dest.foreach_child(function(c){
+			dest.foreach_child(function(c,i){
 				var mul = form.add("MULT");
-				mul.add_child(c.id);
 				mul.add_child(src.copy().id);
+				mul.add_child(c.id);
 				c.replace(mul.id);
 			})
 		}
