@@ -57,8 +57,16 @@ var Node = function(f, handle){
 	this.foreach_child = function(cbk){
 		var f = this.formula;
 		for(var i=0; i < this.children.length; i++){
-			cbk(f.get(this.children[i]),i);
+			if(f.has(this.children[i]))
+				cbk(f.get(this.children[i]),i);
 		}
+	}
+	this.add_child_before = function(child_id, bef_id){
+		var j = -1;
+		this.foreach_child(function(c,i){
+			if(c.id == id) j = i;
+		});
+		this.children.splice(j,0,child_id);
 	}
 	this.add_child = function(child_id, tofront){
 		if(isUndefined(tofront) || ! tofront){
@@ -69,6 +77,14 @@ var Node = function(f, handle){
 			if(this.children.indexOf(child_id) < 0)
 				this.children.unshift(child_id);
 		}
+	}
+	this.remove_child = function(id){
+		var f = this.formula;
+		var j = -1;
+		this.foreach_child(function(c,i){
+			if(c.id == id) j = i;
+		});
+		if(j >= 0) this.children.splice(j,1); // removes that child.
 	}
 	this.init = function(f,handle){
 		var that = this;
@@ -110,15 +126,12 @@ var Node = function(f, handle){
 		var f = this.formula;
 		var par = this.parent();
 		if(par != null){
-			var vid = this.id;
-			par.foreach_child(function(c,i){
-				if(c.id == vid){
-					console.log(i,c.print())
-					par.children[i] = new_id;
-				}
-			})
-			f.get(new_id).parent_id = this.parent_id;
+			console.log(par.children);
+			par.add_child_before(new_id, this.id);
+			par.remove_child(this.id);
+			console.log(par.children);
 			this.parent_id = -1;
+			f.get(new_id).parent_id = this.parent_id;
 		}
 		else{
 			f.get(new_id).parent_id = -1;
@@ -129,7 +142,13 @@ var Node = function(f, handle){
 		return this;
 	}
 	this.remove = function(child_to_moveup){
-		this.replace(child_to_moveup);
+		if(isUndefined(child_to_moveup)){
+			var par = this.parent();
+			par.remove_child(this.id);
+			this.parent_id = -1;
+		}
+		else
+			this.replace(child_to_moveup);
 	}
 	this.data = function(key){
 		return this._data[key];
@@ -160,12 +179,15 @@ var Node = function(f, handle){
 		var op = this.data('op');
 		if(type == "op" && op == "paren"){
 			var chl = f.get(this.children[0]);
-			str += "(";
-			str += chl.print();
-			str += ")";
+			if(chl != null){
+				str += "(";
+				str += chl.print();
+				str += ")";
+			}
 		}
 		else if(type == 'op'){
 			for(var i in this.children){
+				if(!f.has(this.children[i])) continue;
 				var chl = f.get(this.children[i]);
 				if(i > 0){
 					str += (this.data('code'));
@@ -205,6 +227,7 @@ var Node = function(f, handle){
 
 	}
 	this.copy = function(nf){ // copy into potentially new Formula
+		if(isUndefined(nf)) nf = this.formula;
 		var n = nf.add(this.HANDLE);
 		n._data = copyData(this._data);
 		n.children = copyData(this.children);
@@ -213,6 +236,9 @@ var Node = function(f, handle){
 	}
 	this.set_formula = function(f){
 		this.formula = f;
+	}
+	this.get_formula = function(){
+		return this.formula;
 	}
 	this.foreach_subtree = function(cbk){
 		cbk(this);
@@ -239,7 +265,6 @@ var Node = function(f, handle){
 		if(this.id == f.root().id){
 			nf.set_root(mappings[this.id]);
 		}
-		console.log("nodes");
 		for(var nid in nodes){
 			var n = nodes[nid];
 			if(n.parent_id in mappings){
