@@ -21,6 +21,9 @@ var Node = function(f, handle){
 				NUMBER: {base:{type:'number', value:null},children:{}}
 			}
 	}
+	this.get_id = function(){
+		return this.id;
+	}
 	this.eval = function(){
 		var type = this.data('type');
 		var op = this.data('op');
