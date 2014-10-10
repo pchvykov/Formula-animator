@@ -20,3 +20,4 @@ QUnit.test( "data.formula.copy", function( assert ) {
 
   }
 });
+
