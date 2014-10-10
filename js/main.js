@@ -32,7 +32,7 @@ $( document ).ready(function() {
         SVG.clear();
     	var data = $("#formula_latex").val().substr();
     	var form = parser.parse(data);
-    	var form_str = form.toString();
+    	var form_str = form.print();
     	// $("#formula_latex_debug").html(form_str);
     	// console.log(form.data);
 
