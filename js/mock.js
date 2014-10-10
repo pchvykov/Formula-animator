@@ -154,3 +154,14 @@ var mock6 = {
 		}
 	}
 }
+
+
+var Person = function (firstName)
+{
+  this.firstName = firstName;
+  this.display = function()
+  {
+  	console.log(firstName);
+  	return 0;
+  }
+}

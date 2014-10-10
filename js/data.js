@@ -1,4 +1,9 @@
-
+/**
+ * What does this function do?
+ * @constructor
+ * @param {string} f - What does f represent?
+ * @param {string} handle - What does handle represent?
+ */
 
 var Node = function(f, handle){
 	//ids of children
@@ -65,6 +70,12 @@ var Node = function(f, handle){
 				return res;
 		}
 	}
+	/**
+	 * What does this method do?: foreach_child 
+	 * @constructor
+	 * @param {string} f - What does f represent?
+	 * @param {string} handle - What does handle represent?
+	 */
 	this.foreach_child = function(cbk){
 		var f = this.formula;
 		for(var i=0; i < this.children.length; i++){
