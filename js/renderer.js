@@ -37,10 +37,10 @@ function create_node(inp, parent_set, paper){
 	
 	text_object = paper.text(); //Create text object
 	text_object.attr({'text-anchor': 'start'});
-	if (inp.op != 'paren') { 
+	if (inp.data('op') != 'paren') { 
 		
-		text_object.id = inp.id; //Create a custom 'ID' attribute which saves the type of node and its ID
-		text_object.code = inp.code;
+		text_object.id = inp.get_id(); //Create a custom 'ID' attribute which saves the type of node and its ID
+		text_object.code = inp.data('code');
 		// console.log(text_object.code);
 	} //Save symbol
 	text_object.parent = parent_set; //Create custom attribute which saves the parent node
@@ -61,6 +61,15 @@ Inputs are:
 The output of this function is a set of Raphael objects. Each object has a number of standard and 'improvised' attributes.
 */
 {
+	var root = input.root();
+	var visit_children = function(node, idx){
+
+		child.foreach_child(function(child, cidx){
+			visit_children(child,cidx);
+		})
+	}
+	root.foreach_child();
+	/*
 	if (parent_set == 0) //create a root_set if none has been defined
 	{
 		var parent_set = paper.set();
@@ -99,7 +108,7 @@ The output of this function is a set of Raphael objects. Each object has a numbe
 			parent_set.push(right_set);
 		}
 	}
-	
+	*/
 
 	return parent_set;
 }
