@@ -121,7 +121,7 @@ over = function() {
             if (results.length > 1){console.log('multiple possibilities!!! choosing first one...')}
             // console.log(results, 'results')
             
-            rule.apply(results[0], temp_form)
+            rule.apply(results[0])
             draw_it(form);
             
             //Show transformation in the bubble:
