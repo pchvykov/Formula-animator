@@ -1,5 +1,9 @@
-
-
+/**
+ * What does this function do?
+ * @constructor
+ * @param {string} f - What does f represent?
+ * @param {string} handle - What does handle represent?
+ */
 var Node = function(f, handle){
 	//ids of children
 	this.NODE ={
@@ -24,6 +28,10 @@ var Node = function(f, handle){
 	this.get_id = function(){
 		return this.id;
 	}
+	/**
+	 * Evaluate the numerical value, ignoring any symbols in the expression.
+	 * This is useful for evaluating operations on constants.
+	 */
 	this.eval = function(){
 		var type = this.data('type');
 		var op = this.data('op');
@@ -65,6 +73,12 @@ var Node = function(f, handle){
 				return res;
 		}
 	}
+	/**
+	 * iterate over all the children in left-right order, invoking function cbk.
+	 * @param {function} cbk - a function that takes in a (Node,number), where the
+	 node is the child node, the number is the position.
+	 * @param {string} handle - What does handle represent?
+	 */
 	this.foreach_child = function(cbk){
 		var f = this.formula;
 		for(var i=0; i < this.children.length; i++){
@@ -72,9 +86,21 @@ var Node = function(f, handle){
 				cbk(f.get(this.children[i]),i);
 		}
 	}
+	/**
+	 * Add child before the node at position j.
+	 * @param {number} child_id - The id number of the child to add.
+	 * @param {number} j - the position to insert the child before. Refer to get_index
+	 * for more info.
+	 */
+
 	this.add_child_before = function(child_id, j){
 		this.children.splice(j,0,child_id);
 	}
+	/**
+	 * Add a child to the leftmost or rightmost position.
+	 * @param {number} child_id - id number of child to add.
+	 * @param {boolean} tofront - whether to add it before the first node.
+	 */
 	this.add_child = function(child_id, tofront){
 		if(isUndefined(tofront) || ! tofront){
 			if(this.children.indexOf(child_id) < 0)
@@ -85,13 +111,26 @@ var Node = function(f, handle){
 				this.children.unshift(child_id);
 		}
 	}
+	/**
+	 * number of children node has.
+	 */
 	this.n_children = function(){
 		return this.children.length;
 	}
+	/**
+	 * remove the child at position j. This does not change the parent id of the child.
+	 * @param {string} j - position of child to remove.
+	 */
 	this.remove_child = function(j){
 		var f = this.formula;
 		if(j >= 0) this.children.splice(j,1); // removes that child.
 	}
+	/**
+	 * Initialize the node.
+	 * @constructor
+	 * @param {Formula} f - the formula to add the node to.
+	 * @param {String} handle - The type of node to add. Must be a key in NODES.
+	 */
 	this.init = function(f,handle){
 		var that = this;
 		var cobble_data = function(data,name){
@@ -128,6 +167,11 @@ var Node = function(f, handle){
 		this._data = data;
 		return data;
 	}
+	/**
+	 * Replace the current node, with the node that has the id new_id, preserving the position
+	 * of the node.
+	 * @param {number} new_id - Id of the node to replace this node with.
+	 */
 	this.replace = function(new_id){
 		var f = this.formula;
 		var par = this.parent();
@@ -145,6 +189,10 @@ var Node = function(f, handle){
 		}
 		return this;
 	}
+	/**
+	 * Remove the current node, replacing it with one of its child nodes. 
+	 * @param {number} child_to_move up. If not defined, doesn't move up any children.
+	 */
 	this.remove = function(child_to_moveup){
 		if(isUndefined(child_to_moveup)){
 			var par = this.parent();
@@ -154,12 +202,30 @@ var Node = function(f, handle){
 		else
 			this.replace(child_to_moveup);
 	}
+	/**
+	 * get the value of a particular property. To see which properties are available,
+	 * refer to the NODES data structure.
+	 * @param {string} key - The name of the property to get.
+	 */
 	this.data = function(key){
 		return this._data[key];
 	}
+	/**
+	 * set the value of a particular property.
+	 * @param {string} key - name of property.
+	 * @param {anything} value - value of property.
+	 */
 	this.set = function(key, value){
 		this._data[key] = value;
 	}
+	/**
+	 * set the parent of the current node, appending the node to the end of
+	 * the parent's children, unless tofront=true (in which case, it is 
+	 * inserted in the beginning)
+	 *
+	 * @param {string} id - id of desired parent 
+	 * @param {boolean} tofront - if true, insert node in front.
+	 */
 	this.set_parent = function(id,tofront){
 		var f = this.formula;
 		this.parent_id = id;
@@ -168,14 +234,25 @@ var Node = function(f, handle){
 			par.add_child(this.id,tofront);
 		}
 	}
+	/**
+	 * get the parent node.
+	 */
 	this.parent = function(){
 		var f = this.formula;
 		return f.get(this.parent_id);
 	}
+	/**
+	 * get the node at position i. See get_index for more info.
+	 * @param {number} i - the index of the child to get.
+	 */
 	this.child = function(i){
 		var f = this.formula;
 		return f.get(this.children[i]);
 	}
+	/**
+	 * Print the node and all its children (outputs the formula)
+	 * + -> a+b+c
+	 */
 	this.print = function(){
 		var f = this.formula;
 		var str = "";
@@ -207,9 +284,10 @@ var Node = function(f, handle){
 		}
 		return str;
 	}
-	/*
-	Given a formula, find all the ancestors.
-	*/
+	/**
+	 * find all the nodes that are descendents of this node, including this node.
+	 * TODO: change function name to descendents.
+	 */
 	this.ancestors = function(){
 		var f = this.formula;
 		var ancestors = function(d){
@@ -230,6 +308,11 @@ var Node = function(f, handle){
 		return a;
 
 	}
+	/**
+	 * copy the current node, inserting it into the formula nf. If no formula
+	 * is provided, the formula the current node belongs to is used.
+	 * @param {Formula} f - Formula to add node to.
+	 */
 	this.copy = function(nf){ // copy into potentially new Formula
 		if(isUndefined(nf)) nf = this.formula;
 		var n = nf.add(this.HANDLE);
@@ -238,12 +321,18 @@ var Node = function(f, handle){
 		n.parent_id = this.parent_id;
 		return n;
 	}
+
 	this.set_formula = function(f){
 		this.formula = f;
 	}
 	this.get_formula = function(){
 		return this.formula;
 	}
+	/**
+	 * iterate over the subtree contained by this node, invoking the function
+	 * cbk on each node.
+	 * @param {function} cbk - Function to invoke on each node. Accepts node as first argument.
+	 */
 	this.foreach_subtree = function(cbk){
 		cbk(this);
 		this.foreach_child(function(node){
@@ -251,10 +340,18 @@ var Node = function(f, handle){
 			node.foreach_subtree(node);
 		});
 	}
+	/**
+	 * find all the nodes that match a particular search expression.
+	 * @param {string} expr - specially formed query. See formula.search
+	 */
 	this.find = function(expr){
 		var f = this.formula;
 		return f.find(expr, this.ancestors());
 	}
+	/**
+	 * get the position of the child with the id 'id'
+	 * @param {number} id - id number of child.
+	 */
 	this.get_index = function(id){
 		for(var i=0; i < this.children.length;i++){
 			if(this.children[i] == id) return i;
