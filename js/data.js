@@ -448,14 +448,14 @@ var Formula = function(){
 		for(var i=0; i < subexp.length; i++){
 			var pred = subexp[i];
 			if(pred.startsWith("#")){
-				var check_id = parseInt(se.substring(1))
-				var new_pred = function(comb,prev, checkid){
+				var check_id = parseInt(pred.substring(1))
+				var new_pred = (function(comb,prev, checkid){
 					return function(node){return comb( prev(node), checkid==node.id) }
-				}(combine,predicates,check_id);
-				var predicates = new_pred;
+				})(combine,predicates,check_id);
+				predicates = new_pred;
 			}
 			else if(pred.startsWith("%%")){
-				var check_id = parseInt(se.substring(2));
+				var check_id = parseInt(pred.substring(2));
 				var anc = this.get(check_id).ancestors(this);
 				var new_pred = function(comb,prev, anc){
 					return function(node){return comb( prev(node), node.id in anc) }
@@ -463,7 +463,7 @@ var Formula = function(){
 				var predicates = new_pred;
 			}
 			else if(pred.startsWith("%")){
-				var check_id = parseInt(se.substring(1));
+				var check_id = parseInt(pred.substring(1));
 				var new_pred = function(comb,prev, checkid){
 					return function(node){return comb( prev(node), checkid==node.parent_id) }
 				}(combine,predicates,check_id);

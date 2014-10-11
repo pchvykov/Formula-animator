@@ -51,3 +51,9 @@ if (typeof String.prototype.startsWith != 'function') {
     return this.indexOf(str) == 0;
   };
 }
+
+var countKeys = function(myobj){
+	var count = 0;
+	for (k in myobj) if (myobj.hasOwnProperty(k)) count++;
+	return count;
+}

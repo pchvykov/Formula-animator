@@ -93,8 +93,7 @@ Transforms.SimplifyConstants = function(){
 		}
 	}
 	this.test = function(params,node){
-		var factor = null
-		var terms = null;
+		var factor = null;
 		var numbers = [];
 		node.foreach_child(function(c){
 			if(c.data('type') == 'number'){
@@ -210,13 +209,13 @@ Transforms.Distribute = function(){
 		var test_param = function(n,t,mparan){
 			var result = {};
 			var result_count = 0;
+			var found = {};
 			n.foreach_child(function(c,idx){
 				var isOk = true;
-
-				
+				//ensure contains all children.
 				for(var i=0; i < t.length; i++){
-					var res = c.get('#'+t[i]);
-					if(res.length == 0) isOk = false;
+					var res = c.find("#"+t[i]);
+					if(countKeys(res) == 0) isOk = false;
 				}
 				//make sure contains all the terms, and if we require parenthesis, require
 				if(isOk && (!mparan || c.data('op') == 'paren')){ //this node contains all sources.
@@ -227,6 +226,7 @@ Transforms.Distribute = function(){
 			return {data:result, count:result_count};
 		}
 
+
 		if(!params.hasOwnProperty('src')){
 			params.src = [];	
 		}
@@ -234,8 +234,7 @@ Transforms.Distribute = function(){
 			params.src = [params.src];
 		}
 
-		var sources = test_param(node,params.src,false);
-
+		
 		if(!params.hasOwnProperty('dest')){
 			params.dest = [];
 		}
@@ -243,6 +242,7 @@ Transforms.Distribute = function(){
 			params.dest = [params.dest];
 		}
 
+		var sources = test_param(node,params.src,false);
 		var dests = test_param(node,params.dest,true);
 
 		return {src:sources, dest:dests, ok:(dests.count != 0 && sources.count != 0)};
@@ -272,8 +272,6 @@ Transforms.Distribute = function(){
 	}
 	this.apply = function(res){
 		var factor;
-		var terms;
-
 		var form = res.dest.get_formula();
 
 		var dest = res.dest.child(0);  //get inside the parenthesis
