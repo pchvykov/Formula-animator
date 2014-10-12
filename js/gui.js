@@ -87,10 +87,10 @@ up = function () {
         console.log(holdid, dropid, left);
 
         var rule = new Transforms.Distribute()
-        var results= rule.find('term:'+holdid.toString()+', term:'+dropid.toString(),form)
+        var results= rule.find('src:'+holdid.toString()+', dest:'+dropid.toString(),form)
         if (results.length > 1){console.log('multiple possibilities!!! choosing first one...')}
         // console.log(results, 'results')
-        rule.apply(results[0], form);
+        rule.apply(results.get(0));
 
         SVG.clear();
 
@@ -114,15 +114,14 @@ over = function() {
             //execute the proposed transformation:
             var temp_form = form.copy();
 
-            // console.log(temp_form);
-            // var rule = new Transforms.Distribute()
+            //console.log(temp_form.print(), 'src:'+holdid.toString()+', dest:'+dropid.toString());
             var rule = new Transforms.Distribute();
-            var results= rule.find('term:'+holdid.toString()+', term:'+dropid.toString(),temp_form)
+            results= rule.find('src:'+holdid.toString()+', dest:'+dropid.toString(),temp_form)
             if (results.length > 1){console.log('multiple possibilities!!! choosing first one...')}
-            // console.log(results, 'results')
+            //console.log(results[0], 'results')
             
-            rule.apply(results[0])
-            draw_it(form);
+            rule.apply(results.get(0))
+            //draw_it(form);
             
             //Show transformation in the bubble:
             xst = dropel.paper.canvas.offsetLeft+dropel.getBBox().x2+20;

@@ -1,4 +1,4 @@
-#http://127.0.0.1:8000/pavel_exp.html
+#http://127.0.0.1:8080/pavel_exp.html
 
 import http.server
 import socketserver
