@@ -1,7 +1,6 @@
 
 //SVG text output to give to Colm
 
-
 function create_node(inp, parent_set, paper){
 	
 	text_object = paper.text(); //Create text object
@@ -109,7 +108,9 @@ function draw_it(form, origin, gui_fl, R){
 
 	R.canvas.style.backgroundColor = '#FFF';
 
-    v = scan_tree(form, R);
+    var v = scan_tree(form, R);
+    //var v1 = v;
+    //confirm("press a button");
     display_equation(v, origin);
     if(gui_fl) {set_gui(v, form, R);}
 

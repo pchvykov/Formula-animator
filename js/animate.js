@@ -41,9 +41,6 @@ var AnimationHandler = function(){
 	}
 
 
-
-
-
 	this.animate_arc = function(raph_object,ex,ey)
 	{
 		var sx = raph_object.attr('x');
@@ -76,10 +73,39 @@ var AnimationHandler = function(){
 			counter=counter+1; // Increase increment to increase speed
 		};
 
-		var animation = window.setInterval(this.animate, 1);  //execute the animation function all 10ms (Smaller value increases speed)
+		var animation = window.setInterval(this.animate, 10);  //execute the animation function all 10ms (Smaller value increases speed)
 		
 		return myPath;
 	}
+
+	// this.distribution_compare = function(intial_set, final_set, counter) //This function compares two raphael sets and has two outputs. The first output is the element which is being distributed.
+	// //The second is the element into which the first output is being distributed. e.g. initial: a*(b+c)*(d+e)  = f; final: (b + c)*(a*d + a*e) = f; The output is "a" and "(d + e)"
+	// {
+	// 	for	(var index = 0; index < initial_set.length; index++)
+	// 	{
+	// 		var dummy = initial_set[index];
+	// 		if (dummy.constructor.prototype == Raphael.st)
+	// 		{
+	// 			distribution_compare(dummy, final_set)
+	// 		}
+	// 		else
+	// 		{
+	// 			found_id = dummy.id;
+	// 			for (var index = 0; index < set_of_found_ids.length; index++)
+	// 			{
+	// 				if (found_id == set_of_found_ids[index].id)
+	// 				{
+	// 					set_of_found_ids[index].code('count')++;
+	// 				}
+	// 				else //if found_id is new
+	// 				{
+
+	// 				}
+	// 			}
+	// 		}
+	// 		//First identify which elements have remained the same, so that we can then identify 
+	// 	}
+	// }
 
 	this.init();
 }

@@ -22,7 +22,7 @@ var BindActionHandlerToSVG = function(sv, data){
 
 var SVG = null;
 $( document ).ready(function() {
-    console.log( "ready!" );
+    console.log( "ready Edwin!" );
     //http://zreference.com/raphael-animation-along-a-path/
     SVG = new Raphael($("#formula_container")[0],screen.width, screen.height/2);
     // var rect = SVG.rect(0, 0, screen.width, screen.height);
@@ -35,8 +35,29 @@ $( document ).ready(function() {
     	var form_str = form.print();
     	// $("#formula_latex_debug").html(form_str);
     	// console.log(form.data);
+        alert("I am an alert box!");
 
         var v = draw_it(form, [50,30], true, SVG)
+        v_original = v;
+
+         alert("Click to see animation!");
+        paper = SVG;
+        edwin_obj1 = paper.text(180, 150, "40");
+        edwin_obj1.attr({
+          'font-size':30
+        });
+        edwin_obj2 = paper.text(250, 150, "+ 30");
+        edwin_obj2.attr({
+          'font-size':30
+        });
+        simple_set = SVG.set();
+        simple_set.push(
+            edwin_obj1,
+            edwin_obj2
+            );
+
+        var path = new AnimationHandler().animate_arc(edwin_obj1,200, 100);
+
 
     	/*
     	var srndr=$("#formula_render")

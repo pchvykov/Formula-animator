@@ -7,6 +7,8 @@
 // });
 
 // document.onselectstart = function(){ return false; }
+var v_original
+var v_over
 
 window.onload = function(){
     var holdid = -1,
@@ -94,7 +96,7 @@ up = function () {
 
         SVG.clear();
 
-        draw_it(form, [50,30], true, SVG)
+       draw_it(form, [50,30], true, SVG)
 
     }
     
@@ -105,7 +107,7 @@ up = function () {
     
 
 },
-over = function() {
+over = function() {//Temporary display of result
 	this.attr({opacity: 0.7, cursor: "default"})
     if (-1 != holdid) { 
         dropid = this.id;
@@ -128,6 +130,8 @@ over = function() {
             yst = dropel.paper.canvas.offsetTop+dropel.getBBox().y2 +40;
             
             var v = draw_it(temp_form, [xst, yst])
+            v_over = v;
+            
 
             //Change font of the bubble equation:
             // bubb.setViewBox(xst,yst, 200,100,true);
