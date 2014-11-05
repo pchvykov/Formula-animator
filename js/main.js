@@ -35,14 +35,16 @@ $( document ).ready(function() {
     	var form_str = form.print();
     	// $("#formula_latex_debug").html(form_str);
     	// console.log(form.data);
-        alert("I am an alert box!");
+       // alert("I am an alert box!");
 
         var v = draw_it(form, [50,30], true, SVG)
         v_original = v;
 
-         alert("Click to see animation!");
+        // alert("Click to see animation!");
         paper = SVG;
-        edwin_obj1 = paper.text(180, 150, "40");
+        
+
+ /*       edwin_obj1 = paper.text(180, 150, "40");
         edwin_obj1.attr({
           'font-size':30
         });
@@ -57,6 +59,7 @@ $( document ).ready(function() {
             );
 
         var path = new AnimationHandler().animate_arc(edwin_obj1,200, 100);
+*/
 
 
     	/*
@@ -72,6 +75,9 @@ $( document ).ready(function() {
     		console.log(selem);
     	})
 		*/
+
+      //  alert("Click to see animation!");
+        path = new AnimationHandler_2().animate_arc(v_original, 250, 250);
     })
 
    
