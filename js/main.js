@@ -77,7 +77,57 @@ $( document ).ready(function() {
 		*/
 
       //  alert("Click to see animation!");
-        path = new AnimationHandler_2().animate_arc(v_original, 250, 250);
+    edwin_obj = paper.text(180, 150, "40");
+    edwin_obj.attr({'font-size':30});
+        //path = new AnimationHandler_2().animate_arc(v_original, 250, 250);
+        //alert("Click me");
+    animate_sim(v_original,edwin_obj);
+
+
+    var a = paper.text(50,150,'a'); a.attr({"font-size": 50});
+    var star = paper.text(80,150,'*'); star.attr({"font-size": 50});
+    var bracket1 = paper.text(110,150,'('); bracket1.attr({"font-size": 50});
+    var b = paper.text(140,150,"b"); b.attr({"font-size": 50});
+    var plus = paper.text(170,150,'+'); plus.data('code','+'); plus.attr({"font-size": 50});
+    var c = paper.text(200,150,'c'); c.attr({"font-size": 50});
+    var bracket2 = paper.text(230,150,')'); bracket2.attr({"font-size": 50});
+
+    var set_a = paper.set();
+    set_a.push(
+        a
+        );
+    
+    var set_b = paper.set();
+    set_b.push(
+        b
+        );
+        
+    var set_c = paper.set();
+    set_c.push(
+        c
+        );
+    
+    var set_b_plus_c = paper.set();
+    set_b_plus_c.push(
+        bracket1,
+        set_b,
+        plus,
+        set_c,
+        bracket2
+        );
+
+    var set_all = paper.set();
+    set_all.push(
+        set_a,
+        star,
+        set_b_plus_c
+        );
+
+    distributor = set_a;
+    distributee = set_b_plus_c;
+    make_room(distributor,distributee,0);
+
+
     })
 
    

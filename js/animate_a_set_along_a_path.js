@@ -32,7 +32,7 @@ var AnimationHandler_2 = function(){
 	this.line_path = function(sx, sy, ex, ey){ //Arc path creates a bezier-curve path
 		console.log('in length part')
 		line_path_input = "M" + sx + "," + sy + " L" + ex + "," + ey;
-		console.log(v_original.getBBox());
+		//console.log(v_original.getBBox());
 		dummy_rect = paper.rect(v_original.getBBox().x, v_original.getBBox().y,20, 20);
 		//var line = paper.path( line_path_input);
 		return line_path_input;
@@ -57,7 +57,7 @@ var AnimationHandler_2 = function(){
 		var counter = 0;    // a counter that counts animation steps
 		var c = paper.rect(raph_object.getBBox().x, raph_object.getBBox().y, raph_object.getBBox().width, (raph_object.getBBox().y2 - raph_object.getBBox().y));
 		dummy_circle = paper.circle(raph_object.getBBox().x, raph_object.getBBox().y,1);
-		console.log(raph_object.getBBox());
+		//console.log(raph_object.getBBox());
 		alert("Click to see animation!");
 
 		this.animate = function() //function animate()
@@ -80,7 +80,7 @@ var AnimationHandler_2 = function(){
 			var transform_input = "T" + (final_pos.x-60) + "," + (final_pos.y-15); //Capital "T" uses absolute positions while "t" does relative positions
 			raph_object.transform(transform_input);
 
-			console.log(final_pos);
+			//console.log(final_pos);
 
 			counter=counter+3; // Increase increment to increase speed
 			c = paper.rect(raph_object.getBBox().x, raph_object.getBBox().y, raph_object.getBBox().width, (raph_object.getBBox().y2 - raph_object.getBBox().y));
@@ -95,3 +95,17 @@ var AnimationHandler_2 = function(){
 	}
 	return 1;
 }
+
+function animate_sim(in1,in2)
+{
+	first_animation = Raphael.animation({transform: "t200,0"}, 1000);
+	second_animation = Raphael.animation({transform: "t200,0"}, 1000);
+	//in1.animate(first_animation);
+	//in2.animate(second_animation);
+	in1.animate({transform: "t200,0"}, 1000);
+	in2.animate({transform: "t200,0"}, 1000);
+	//in2.animateWith(in1, first_animation, first_animation);
+	return;
+}
+
+
