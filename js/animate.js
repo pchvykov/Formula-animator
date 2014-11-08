@@ -28,11 +28,17 @@ var AnimationHandler = function(){
 	}
 
 	//this.arc = function(name, sx, sy, ex, ey, duration){
-	this.arc_path = function(name, sx, sy, ex, ey){
+	this.arc_path = function(name, Sx, Sy, Ex, Ey){
+		sx=Sx;
+		sy=Sy;
+		ex=Ex-sx;
+		ey=Ey-sy;
 		console.log('in arc part')
 		var qx = (sx + sy)/2;
 		//var qy = sy - (((3)^0.5)/2)*(ex-sx);
 		var qy = sy - 100;
+
+
 
 		var spath = this.path([{x:sx,y:sy}, {x:qx, y:qy},{x:ex, y:ey}]);
 

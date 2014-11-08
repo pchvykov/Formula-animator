@@ -1,8 +1,6 @@
 
 var AnimationHandler_2 = function(){
-	// this.init = function(){
-	// 	this.callbacks = {};
-	// }
+
 	this.path = function(pts){
 		var res = "";
 		var sx = pts[0].x;
@@ -21,33 +19,40 @@ var AnimationHandler_2 = function(){
 		return res;
 	}
 
-	this.arc_path = function(sx, sy, ex, ey){ //Arc path creates a bezier-curve path
+	this.arc_path = function(Sx, Sy, Ex, Ey){ //Arc path creates a text string in the correct format used for creating a Bezier path
+		//Sx  = absolute starting x point
+		//Sy = absolute starting y point
+		//Ex = end x point
+		//Ey = end y point
+		//returns a text string in the correct format used for raphael and svg paths
+
 		console.log('in arc part')
-		var qx = (sx + sy)/2;
-		var qy = sy - 100;
-		var spath = this.path([{x:sx,y:sy}, {x:qx, y:qy},{x:ex, y:ey}]);
+		var Qx = (Sx + Ey)/2; //x-coordinate of the mid-point of the bezier curve
+		var Qy = Sy - 100; //y-coordinate of the mid-point of the bezier curve. Note that this value usually does NOT exactly match the observed y-coordinate
+		var spath = "M" + Sx + "," + Sy + "Q" + Qx + "," + Qy + "," + Ex + "," + Ey;
 		return spath;
 	}
 
-	this.line_path = function(sx, sy, ex, ey){ //Arc path creates a bezier-curve path
+	this.line_path = function(paper,sx, sy, ex, ey){ //line_path creates a straigh line path
 		console.log('in length part')
 		line_path_input = "M" + sx + "," + sy + " L" + ex + "," + ey;
-		//console.log(v_original.getBBox());
 		dummy_rect = paper.rect(v_original.getBBox().x, v_original.getBBox().y,20, 20);
-		//var line = paper.path( line_path_input);
 		return line_path_input;
 	}
 
-
-	this.animate_arc = function(raph_object,ex,ey)
+	var animation; //Ask Colm what this means.
+	this.animate_along_a_path = function(raph_object,Ex,Ey)
 	{
-		var sx = (raph_object.getBBox().x);// + v_original.getBBox().x2) / 2; //Defines start x position
-		var sy = (raph_object.getBBox().y)+ 100;// + v_original.getBBox().y2) / 2; //Defines start y position
-		var myPath = this.arc_path(sx, sy, ex, ey);
-		var raphPath = paper.path(myPath);
-		//var myPath = this.line_path(sx, sy, ex, ey);
-		//var raphPath = paper.path(myPath);
+		//This function animates an input (input description below) along a given path (which could be an arc or a line)
+		//paper = Raphael paper on which we will perform the animation
+		//raph_object = "Item" (which could be a Raphael Set, or a simple Raphael element)  which we want to animate along a path
+		//ex = Absolute end point x-coordinate
+		//ey = Absolute end point y-coordinate
 
+		var Sx = (raph_object.getBBox().x + raph_object.getBBox().x2) / 2; //Defines start x position
+		var Sy = (raph_object.getBBox().y + raph_object.getBBox().y2) / 2;// + v_original.getBBox().y2) / 2; //Defines start y position
+		var myPath_text_string = this.arc_path(Sx, Sy, Ex, Ey); //Get the correct bezier text string
+		var raphPath = paper.path(myPath_text_string); //Create the bezier path
 
 		raphPath.attr(
 		{
@@ -55,10 +60,8 @@ var AnimationHandler_2 = function(){
 		})
 
 		var counter = 0;    // a counter that counts animation steps
-		var c = paper.rect(raph_object.getBBox().x, raph_object.getBBox().y, raph_object.getBBox().width, (raph_object.getBBox().y2 - raph_object.getBBox().y));
-		dummy_circle = paper.circle(raph_object.getBBox().x, raph_object.getBBox().y,1);
-		//console.log(raph_object.getBBox());
-		alert("Click to see animation!");
+		//var c = paper.rect(raph_object.getBBox().x, raph_object.getBBox().y, raph_object.getBBox().width, (raph_object.getBBox().y2 - raph_object.getBBox().y)); //Draw a rectangle around object for debugging purposes
+		//dummy_circle = paper.circle(raph_object.getBBox().x, raph_object.getBBox().y,1); //Draw a circle to mark the object movement for debugging purposes
 
 		this.animate = function() //function animate()
 		{
@@ -71,32 +74,29 @@ var AnimationHandler_2 = function(){
 			 }
 
 			var final_pos = raphPath.getPointAtLength(counter);   //get the position (see Raphael docs)
-			
-			//var initial_pos = [v_original.getBBox().x,v_original.getBBox().y];
-			//var x_offset = final_pos.x - initial_pos[0];
-			//var y_offset = final_pos.y - initial_pos[1];
-			//var transform_input = "t" + x_offset + "," + y_offset;
-			c.remove();
-			var transform_input = "T" + (final_pos.x-60) + "," + (final_pos.y-15); //Capital "T" uses absolute positions while "t" does relative positions
-			raph_object.transform(transform_input);
+
+			//c.remove(); //Remove rectangle (for debugging purposes)
+			var transform_input = "T" + (final_pos.x) + "," + (final_pos.y); //Capital "T" uses absolute positions while "t" does relative positions
+			raph_object.attr({x: final_pos.x, y: final_pos.y});
+			//raph_object.animate({transform: transform_input},10);//raph_object.transform(transform_input); This does the animation between two points
 
 			//console.log(final_pos);
 
 			counter=counter+3; // Increase increment to increase speed
-			c = paper.rect(raph_object.getBBox().x, raph_object.getBBox().y, raph_object.getBBox().width, (raph_object.getBBox().y2 - raph_object.getBBox().y));
-			dummy_circle = paper.circle(raph_object.getBBox().x, raph_object.getBBox().y,1);
+			//c = paper.rect(raph_object.getBBox().x, raph_object.getBBox().x, raph_object.getBBox().y,1); //for debugging
 		};
 
-		var animation = window.setInterval(this.animate, 10);  //execute the animation function all 10ms (Smaller value increases speed)
+		animation = window.setInterval(this.animate, 10);  //execute the animation function all 10ms (Smaller value increases speed)
 
 		//var path = new AnimationHandler_2().animate_arc(v_original, 250, 100);
 		//v_original.transform("T100,100")
-		return myPath;
+		return myPath_text_string;
 	}
 	return 1;
 }
 
-function animate_sim(in1,in2)
+
+function animate_sim(in1,in2) //This dummy function is used to test my ability to animate two raphael objects simulataneously
 {
 	first_animation = Raphael.animation({transform: "t200,0"}, 1000);
 	second_animation = Raphael.animation({transform: "t200,0"}, 1000);

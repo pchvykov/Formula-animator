@@ -77,7 +77,7 @@ $( document ).ready(function() {
 		*/
 
       //  alert("Click to see animation!");
-    edwin_obj = paper.text(180, 150, "40");
+    edwin_obj = paper.text(400, 400, "40");
     edwin_obj.attr({'font-size':30});
         //path = new AnimationHandler_2().animate_arc(v_original, 250, 250);
         //alert("Click me");
@@ -90,7 +90,9 @@ $( document ).ready(function() {
     var b = paper.text(140,150,"b"); b.attr({"font-size": 50});
     var plus = paper.text(170,150,'+'); plus.data('code','+'); plus.attr({"font-size": 50});
     var c = paper.text(200,150,'c'); c.attr({"font-size": 50});
-    var bracket2 = paper.text(230,150,')'); bracket2.attr({"font-size": 50});
+    var plus2 = paper.text(230,150,'+'); plus2.data('code','+'); plus2.attr({"font-size": 50});
+    var d = paper.text(260,150,'d'); d.attr({"font-size": 50});
+    var bracket2 = paper.text(290,150,')'); bracket2.attr({"font-size": 50});
 
     var set_a = paper.set();
     set_a.push(
@@ -106,13 +108,21 @@ $( document ).ready(function() {
     set_c.push(
         c
         );
+
+    var set_d = paper.set();
+    set_d.push(
+        d
+        );
     
-    var set_b_plus_c = paper.set();
-    set_b_plus_c.push(
+    
+    var set_b_plus_c_plus_d = paper.set();
+    set_b_plus_c_plus_d.push(
         bracket1,
         set_b,
         plus,
         set_c,
+        plus2,
+        set_d,
         bracket2
         );
 
@@ -120,11 +130,15 @@ $( document ).ready(function() {
     set_all.push(
         set_a,
         star,
-        set_b_plus_c
+        set_b_plus_c_plus_d
         );
 
-    distributor = set_a;
-    distributee = set_b_plus_c;
+    distributor = paper.set();
+    distributor.push(
+        set_a,
+        star
+        );
+    distributee = set_b_plus_c_plus_d;
     make_room(distributor,distributee,0);
 
 
