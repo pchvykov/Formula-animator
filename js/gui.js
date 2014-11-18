@@ -7,6 +7,8 @@
 // });
 
 // document.onselectstart = function(){ return false; }
+var v_original
+var v_over
 
 window.onload = function(){
     var holdid = -1,
@@ -42,8 +44,8 @@ window.onload = function(){
 //     s1.id=3; s2.id=16; s3.id=15; s4.id=29; s5.id=28;
 
 
-
-var forEl = function(el, elfn) { //Execute the function for all elements in set (not sets)
+//function forEl(el,elfn){
+ forEl = function(el, elfn) { //Execute the function for all elements in set (not sets)
     el.forEach(function(sel) {
         if(sel.constructor.prototype ==  Raphael.st) {
             forEl(sel, elfn);
@@ -51,6 +53,11 @@ var forEl = function(el, elfn) { //Execute the function for all elements in set 
         else {elfn(sel);}
 
     })
+}
+
+edwin_dummy_function = function(input)
+{
+    console.log(input);
 }
 
 
@@ -96,6 +103,7 @@ up = function () {
         
         draw_it(form, [50,30], true, SVG)
 
+
     }
     
     holdid = -1;
@@ -105,7 +113,7 @@ up = function () {
     
 
 },
-over = function() {
+over = function() {//Temporary display of result
 	this.attr({opacity: 0.7, cursor: "default"})
     if (-1 != holdid) { 
         dropid = this.id;
@@ -128,6 +136,8 @@ over = function() {
             yst = dropel.paper.canvas.offsetTop+dropel.getBBox().y2 +40;
             
             var v = draw_it(temp_form, [xst, yst])
+            v_over = v;
+            
 
             //Change font of the bubble equation:
             // bubb.setViewBox(xst,yst, 200,100,true);
