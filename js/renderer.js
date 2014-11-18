@@ -93,7 +93,6 @@ function display_equation(parent_set,origin)
 }
 
 
-
 //Does everything to display formula
 function draw_it(form, origin, gui_fl, R){
 	//Defaults:
@@ -105,11 +104,11 @@ function draw_it(form, origin, gui_fl, R){
 		origin = [10, 10];
 	}
 	
-	
 
 	R.canvas.style.backgroundColor = '#FFF';
 
-    v = scan_tree(form, R);
+    var v = scan_tree(form, R);
+ 
     display_equation(v, origin);
     if(gui_fl) {set_gui(v, form, R);}
 

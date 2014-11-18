@@ -93,7 +93,7 @@ up = function () {
         rule.apply(results.get(0));
 
         SVG.clear();
-
+        
         draw_it(form, [50,30], true, SVG)
 
     }
