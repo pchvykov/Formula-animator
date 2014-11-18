@@ -11,6 +11,16 @@ var v_original
 var v_over
 
 window.onload = function(){
+    /**
+     * holdid = id of the element currently being dragged
+     * dropid = id of the element over which another is dropped
+     * left = is mouse currently on left side of the drop element? 
+     * exec = ??
+     * form = mater tree
+     * delay = delay on holding one element over another before acting
+     * SVG = paper
+     * bubb = Raphael paper (bubble) where the temporary equation is displayed
+     */
     var holdid = -1,
         dropid = -1, 
         left = false,
@@ -44,7 +54,11 @@ window.onload = function(){
 //     s1.id=3; s2.id=16; s3.id=15; s4.id=29; s5.id=28;
 
 
-//function forEl(el,elfn){
+/**
+     * iterates through Raphael tree, executing elfn function only on terminal elements (not subsets)
+     * @param {set} el - Raphael tree node
+     * @param {function} elfn - function that takes in a terminal element
+     */
  forEl = function(el, elfn) { //Execute the function for all elements in set (not sets)
     el.forEach(function(sel) {
         if(sel.constructor.prototype ==  Raphael.st) {
@@ -60,7 +74,9 @@ edwin_dummy_function = function(input)
     console.log(input);
 }
 
-
+/**
+     * executes on mouse-down for start of a drag
+     */
 var start = function () {
     test = this.parent;
     forEl(this.parent, function(el) {
@@ -72,6 +88,9 @@ var start = function () {
     // console.log(this.ox, this.oy);
     // this.animate({r: 70, opacity: .25}, 500, ">");
 },
+/**
+     * executes on mouse-move for dragging
+     */
 move = function (dx, dy, x) {
     forEl(this.parent, function(el) {
         el.attr({x: el.ox + dx, y: el.oy + dy})
@@ -82,6 +101,9 @@ move = function (dx, dy, x) {
     }
     // console.log(this.ox);
 },
+/**
+     * executes on mouse-up at the end of a drag
+     */
 up = function () {
     if(dropid == -1 || dropid == holdid) {
         forEl(this.parent, function(el) {
@@ -113,6 +135,9 @@ up = function () {
     
 
 },
+/**
+     * executes on mouse-rollover
+     */
 over = function() {//Temporary display of result
 	this.attr({opacity: 0.7, cursor: "default"})
     if (-1 != holdid) { 
@@ -149,12 +174,18 @@ over = function() {//Temporary display of result
     if(holdid == dropid){clearTimeout(delay);}
 
 },
+/**
+     * executes on mouse-out
+     */
 out = function() {
 	this.attr({opacity: 1})
     dropid = -1;
     clearTimeout(delay);
     bubb.clear();
 },
+/**
+     * executes on double-click
+     */
 dblcl = function() {
     exec = this.id;
     this.attr({stroke: "red"})
@@ -171,6 +202,12 @@ dblcl = function() {
 // res.node.setAttribute("class","def")
 
 //==============================================
+/**
+     * assigns the interaction function to all the elements
+     * @param {set} res - top-most set of Raphael tree
+     * @param {tree} formula - master tree
+     * @param {paper} paper - Raphael paper
+     */
 set_gui = function(res,formula, paper){
     form = formula;
     SVG = paper;
