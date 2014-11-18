@@ -7,6 +7,7 @@ function create_node(inp, parent_set, paper){
 	if (inp.data('op') != 'paren') { //handle parenthesis elsewhere
 		text_object.id = inp.get_id(); //Create a custom 'ID' attribute which saves the type of node and its ID
 		text_object.code = inp.data('code');
+		text_object.attr({'text-anchor': 'start'});
 	} 
 	text_object.parent = parent_set; //Create custom attribute which saves the parent node
 	

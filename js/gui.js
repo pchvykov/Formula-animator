@@ -44,8 +44,8 @@ window.onload = function(){
 //     s1.id=3; s2.id=16; s3.id=15; s4.id=29; s5.id=28;
 
 
-
-var forEl = function(el, elfn) { //Execute the function for all elements in set (not sets)
+//function forEl(el,elfn){
+ forEl = function(el, elfn) { //Execute the function for all elements in set (not sets)
     el.forEach(function(sel) {
         if(sel.constructor.prototype ==  Raphael.st) {
             forEl(sel, elfn);
@@ -53,6 +53,11 @@ var forEl = function(el, elfn) { //Execute the function for all elements in set 
         else {elfn(sel);}
 
     })
+}
+
+edwin_dummy_function = function(input)
+{
+    console.log(input);
 }
 
 
