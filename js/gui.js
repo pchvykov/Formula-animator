@@ -10,6 +10,7 @@
 var v_original
 var v_over
 
+
 window.onload = function(){
     var holdid = -1,
         dropid = -1, 
@@ -50,7 +51,11 @@ window.onload = function(){
         if(sel.constructor.prototype ==  Raphael.st) {
             forEl(sel, elfn);
         }
-        else {elfn(sel);}
+        else {
+            elfn(sel);
+            distributor_set.push(
+                sel);
+        }
 
     })
 }
