@@ -351,7 +351,7 @@ Transforms.Distribute = function(){
 		var dest = res.dest.child(0);  //get inside the parenthesis
 		var dest_op =dest.data("op");
 		var src = res.src;
-		var top = dest.parent();
+		var top = src.parent();
 
 		log.mark('paren',dest.id);
 		log.mark('top',top.id);
