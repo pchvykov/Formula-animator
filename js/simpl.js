@@ -40,45 +40,7 @@ SimplifyConstantsSearchResults = function(){
 	}
 }
 
-this.DistributeSearchResult = function(){
-	this.data = {};
-	this._len = 0;
-	this.add = function(i,s,j,d){
-		var dist = Math.abs(i-j);
-		if(!this.data.hasOwnProperty(dist))
-			this.data[dist] = [];
-		this.data[dist].push({src:s,dest:d});
-		this._len+=1;
-	}
 
-	this.get = function(id){
-		var k=0;
-		for(var dist in this.data){
-			for(var i=0; i < this.data[dist].length; i++){
-				if(k == id){
-					return {src:this.data[dist][i].src, dest:this.data[dist][i].dest, dist:dist};
-				}
-				k++;
-			}
-		}
-	}
-	this.foreach = function(cbk){
-		for(var dist in this.data){
-			for(var i=0; i < this.data[dist].length; i++){
-				cbk(this.data[dist][i].src, this.data[dist][i].dest, dist, i);
-			}
-		}
-	}
-	this.print = function(){
-		for(var i in this.data){
-			console.log("## Distance: ",i);
-			for(var j = 0; j < this.data[i].length; j++){
-				var c = this.data[i][j];
-				console.log("   > src: ",c.src.print(), ", dest: ",c.dest.print());
-			}
-		}		
-	}
-}
 
 ApplyResult = function(name){
 	this.init = function(name){
@@ -113,9 +75,25 @@ ApplyResult = function(name){
 				res.push(id)
 			}
 		}
+		if(res.length == 0){
+			for(var i=0; i < this.m.del.length; i++){
+				if(this.m.del[i] == old_id){
+					return null; 
+				}
+			}
+			return undefined;
+		}
 		return res;
 	}
 	this.from = function(new_id){
+		if(!(new_id in this.m)){
+			for(var i=0; i < this.m.add.length; i++){
+				if(this.m.add[i] == new_id){
+					return null; 
+				}
+			}
+			return undefined;
+		}
 		return this.m[new_id];
 	}
 	this.new_ids = function(){
@@ -253,6 +231,46 @@ Transforms.SimplifyConstants = function(){
 }
 Transforms.SimplifyConstants.prototype = new Transform();
 
+this.DistributeSearchResult = function(){
+	this.data = {};
+	this._len = 0;
+	this.add = function(i,s,j,d){
+		var dist = Math.abs(i-j);
+		if(!this.data.hasOwnProperty(dist))
+			this.data[dist] = [];
+		this.data[dist].push({src:s,dest:d});
+		this._len+=1;
+	}
+
+	this.get = function(id){
+		var k=0;
+		for(var dist in this.data){
+			for(var i=0; i < this.data[dist].length; i++){
+				if(k == id){
+					return {src:this.data[dist][i].src, dest:this.data[dist][i].dest, dist:dist};
+				}
+				k++;
+			}
+		}
+	}
+	this.foreach = function(cbk){
+		for(var dist in this.data){
+			for(var i=0; i < this.data[dist].length; i++){
+				cbk(this.data[dist][i].src, this.data[dist][i].dest, dist, i);
+			}
+		}
+	}
+	this.print = function(){
+		for(var i in this.data){
+			console.log("## Distance: ",i);
+			for(var j = 0; j < this.data[i].length; j++){
+				var c = this.data[i][j];
+				console.log("   > src: ",c.src.print(), ", dest: ",c.dest.print());
+			}
+		}		
+	}
+}
+
 Transforms.Distribute = function(){
 	this.init = function(){
 		
@@ -333,9 +351,10 @@ Transforms.Distribute = function(){
 		var dest = res.dest.child(0);  //get inside the parenthesis
 		var dest_op =dest.data("op");
 		var src = res.src;
-		console.log(dest.print(), src.print(), dest_op)
+		var top = dest.parent();
 
 		log.mark('paren',dest.id);
+		log.mark('top',top.id);
 		//distribute over dest;
 		if(dest_op== "mult"){
 			dest.foreach_child(function(c,i){
