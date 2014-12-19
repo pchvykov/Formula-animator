@@ -1,5 +1,132 @@
 
 
+SimplifyConstantsSearchResults = function(){
+	this.data = {};
+	this.add = function(r,chl){
+		var len = 0;
+		var res = r.find('type:number');
+		for(var q in res){
+			len++;
+		}
+		if(!this.data.hasOwnProperty(len)){
+			this.data[len] = [];
+		}
+		this.data[len].push({node:r,children:chl});
+	}
+	this.print = function(){
+		for(var q in this.data){
+			console.log("Number Constants: ",q);
+			for(var r = 0; r < this.data[q].length; r++){
+				console.log("> ", this.data[q][r].node.print());
+			}
+		}
+	}
+	this.get = function(i){
+		var k=0;
+		for(var q in this.data){
+			for(var r = 0; r < this.data[q].length; r++){
+				if(i == k) return this.data[q][r];
+				k++;
+			}
+		}
+		return null;
+	}
+	this.foreach = function(cbk){
+		for(var q in this.data){
+			for(var r=0; r < this.data[q].length; r++){
+				cbk(this.data[q][r].node, this.data[q][r].children, (q), r);
+			}
+		}
+	}
+}
+
+this.DistributeSearchResult = function(){
+	this.data = {};
+	this._len = 0;
+	this.add = function(i,s,j,d){
+		var dist = Math.abs(i-j);
+		if(!this.data.hasOwnProperty(dist))
+			this.data[dist] = [];
+		this.data[dist].push({src:s,dest:d});
+		this._len+=1;
+	}
+
+	this.get = function(id){
+		var k=0;
+		for(var dist in this.data){
+			for(var i=0; i < this.data[dist].length; i++){
+				if(k == id){
+					return {src:this.data[dist][i].src, dest:this.data[dist][i].dest, dist:dist};
+				}
+				k++;
+			}
+		}
+	}
+	this.foreach = function(cbk){
+		for(var dist in this.data){
+			for(var i=0; i < this.data[dist].length; i++){
+				cbk(this.data[dist][i].src, this.data[dist][i].dest, dist, i);
+			}
+		}
+	}
+	this.print = function(){
+		for(var i in this.data){
+			console.log("## Distance: ",i);
+			for(var j = 0; j < this.data[i].length; j++){
+				var c = this.data[i][j];
+				console.log("   > src: ",c.src.print(), ", dest: ",c.dest.print());
+			}
+		}		
+	}
+}
+
+ApplyResult = function(name){
+	this.init = function(name){
+		this.name = name;
+		this.m = {};
+		this.l = {};
+		this.m.add = [];
+		this.m.del = [];
+	}
+	this.mark = function(name,id){
+		this.l[name] = id;
+	}
+	this.get = function(name){
+		return this.l[name];
+	}
+	this.map  = function(oldid,newid){
+		if(isUndefined(newid)) return;
+		if(newid == null){
+			this.m.del.push(oldid);
+			return;
+		}
+		if(oldid == null){
+			this.m.add.push(newid);
+			return;
+		}
+		this.m[newid] = oldid;
+	}
+	this.to = function(old_id){
+		var res = [];
+		for(id in this.m){
+			if(id != "del" && id != "add" && this.m[id] == old_id){
+				res.push(id)
+			}
+		}
+		return res;
+	}
+	this.from = function(new_id){
+		return this.m[new_id];
+	}
+	this.new_ids = function(){
+		return this.m.add
+	}
+	this.del_ids = function(){
+		return this.m.del;
+	}
+	this.init(name);
+}
+
 Transform = function(){
 	/*
 	find all possible applications of this transformation
@@ -27,6 +154,9 @@ Transform = function(){
 
 		return dict;
 	}
+	this.get_name = function(){
+		return this.name;
+	}
 	/*
 	
 	*/
@@ -52,45 +182,7 @@ Transforms.SimplifyConstants = function(){
 	params: term:XXX term:XXX
 	*/
 	this.init = function(){
-		this.SimplifyConstantsSearchResults = function(){
-			this.data = {};
-			this.add = function(r,chl){
-				var len = 0;
-				var res = r.find('type:number');
-				for(var q in res){
-					len++;
-				}
-				if(!this.data.hasOwnProperty(len)){
-					this.data[len] = [];
-				}
-				this.data[len].push({node:r,children:chl});
-			}
-			this.print = function(){
-				for(var q in this.data){
-					console.log("Number Constants: ",q);
-					for(var r = 0; r < this.data[q].length; r++){
-						console.log("> ", this.data[q][r].node.print());
-					}
-				}
-			}
-			this.get = function(i){
-				var k=0;
-				for(var q in this.data){
-					for(var r = 0; r < this.data[q].length; r++){
-						if(i == k) return this.data[q][r];
-						k++;
-					}
-				}
-				return null;
-			}
-			this.foreach = function(cbk){
-				for(var q in this.data){
-					for(var r=0; r < this.data[q].length; r++){
-						cbk(this.data[q][r].node, this.data[q][r].children, (q), r);
-					}
-				}
-			}
-		}
+
 	}
 	this.test = function(params,node){
 		var factor = null;
@@ -163,44 +255,7 @@ Transforms.SimplifyConstants.prototype = new Transform();
 
 Transforms.Distribute = function(){
 	this.init = function(){
-		this.DistributeSearchResult = function(){
-			this.data = {};
-			this._len = 0;
-			this.add = function(i,s,j,d){
-				var dist = Math.abs(i-j);
-				if(!this.data.hasOwnProperty(dist))
-					this.data[dist] = [];
-				this.data[dist].push({src:s,dest:d});
-				this._len+=1;
-			}
-			this.get = function(id){
-				var k=0;
-				for(var dist in this.data){
-					for(var i=0; i < this.data[dist].length; i++){
-						if(k == id){
-							return {src:this.data[dist][i].src, dest:this.data[dist][i].dest, dist:dist};
-						}
-						k++;
-					}
-				}
-			}
-			this.foreach = function(cbk){
-				for(var dist in this.data){
-					for(var i=0; i < this.data[dist].length; i++){
-						cbk(this.data[dist][i].src, this.data[dist][i].dest, dist, i);
-					}
-				}
-			}
-			this.print = function(){
-				for(var i in this.data){
-					console.log("## Distance: ",i);
-					for(var j = 0; j < this.data[i].length; j++){
-						var c = this.data[i][j];
-						console.log("   > src: ",c.src.print(), ", dest: ",c.dest.print());
-					}
-				}		
-			}
-		}
+		
 	}
 	/*
 	params: src:XXX src:XXX dest:XXX
@@ -251,7 +306,7 @@ Transforms.Distribute = function(){
 	this.find = function(filter, form){
 		var params = this.make_checker(filter);
 		var unfilt = form.find('type:op op:mult');
-		var result = new this.DistributeSearchResult();
+		var result = new DistributeSearchResult();
 
 		for(var i in unfilt){
 			var res = this.test(params,unfilt[i]);
@@ -273,35 +328,50 @@ Transforms.Distribute = function(){
 	this.apply = function(res){
 		var factor;
 		var form = res.dest.get_formula();
+		var log = new ApplyResult("distribute");
 
 		var dest = res.dest.child(0);  //get inside the parenthesis
 		var dest_op =dest.data("op");
 		var src = res.src;
 		console.log(dest.print(), src.print(), dest_op)
+
+		log.mark('paren',dest.id);
 		//distribute over dest;
 		if(dest_op== "mult"){
 			dest.foreach_child(function(c,i){
-				mul.add_child_before(src.copy().id, c.id);
+				var nc = src.copy();
+				mul.add_child_before(nc.id, c.id);
+				log.map(src.id, nc.id);
 			})
 		}
 		else if(dest_op == "sub" || dest_op == "plus"){
 			dest.foreach_child(function(c,i){
 				var mul = form.add("MULT");
-				mul.add_child(src.copy().id);
+				var nc = src.copy();
+				mul.add_child(nc.id);
 				mul.add_child(c.id);
+				//add mappings
+				log.map(src.id, nc.id);
+				log.map(c.id,c.id);
+				log.map(null, mul.id);
+				//done
 				c.replace(mul.id);
 			})
 		}
 		else {
 			var mul = form.add("MULT");
+			var nc = src.copy();
 			dest.replace(mul.id);
 			mul.add_child(dest);
-			mul.add_child(src.copy());
+			mul.add_child(nc);
+			log.map(src.id, nc.id);
+			log.map(null, mul.id);
 		}
-		console.log("removing src");
 		//remove the source from the products.
 		src.remove();
 		form.cleanup();
+		return log;
+
 	}
 	this.init();
 };
