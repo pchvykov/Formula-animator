@@ -4,7 +4,7 @@
  * @param {string} f - What does f represent?
  * @param {string} handle - What does handle represent?
  */
-var Node = function(f, handle){
+var Node = function Node(f, handle){
 	//ids of children
 	this.NODE ={
 			base: {type:'unknown', code:'?'},
@@ -393,7 +393,7 @@ var Node = function(f, handle){
 	}
 	this.init(f,handle);
 }
-var Formula = function(){
+var Formula = function Formula(){
 
 	this.init = function(){
 		this.nodes = {};

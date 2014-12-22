@@ -1,46 +1,5 @@
 
 
-SimplifyConstantsSearchResults = function(){
-	this.data = {};
-	this.add = function(r,chl){
-		var len = 0;
-		var res = r.find('type:number');
-		for(var q in res){
-			len++;
-		}
-		if(!this.data.hasOwnProperty(len)){
-			this.data[len] = [];
-		}
-		this.data[len].push({node:r,children:chl});
-	}
-	this.print = function(){
-		for(var q in this.data){
-			console.log("Number Constants: ",q);
-			for(var r = 0; r < this.data[q].length; r++){
-				console.log("> ", this.data[q][r].node.print());
-			}
-		}
-	}
-	this.get = function(i){
-		var k=0;
-		for(var q in this.data){
-			for(var r = 0; r < this.data[q].length; r++){
-				if(i == k) return this.data[q][r];
-				k++;
-			}
-		}
-		return null;
-	}
-	this.foreach = function(cbk){
-		for(var q in this.data){
-			for(var r=0; r < this.data[q].length; r++){
-				cbk(this.data[q][r].node, this.data[q][r].children, (q), r);
-			}
-		}
-	}
-}
-
-
 
 ApplyResult = function(name){
 	this.init = function(name){
@@ -155,7 +114,48 @@ Transforms.MoveTerm.prototype = new Transform();
 
 
 
-Transforms.SimplifyConstants = function(){
+
+SimplifyConstantsSearchResults = function(){
+	this.data = {};
+	this.add = function(r,chl){
+		var len = 0;
+		var res = r.find('type:number');
+		for(var q in res){
+			len++;
+		}
+		if(!this.data.hasOwnProperty(len)){
+			this.data[len] = [];
+		}
+		this.data[len].push({node:r,children:chl});
+	}
+	this.print = function(){
+		for(var q in this.data){
+			console.log("Number Constants: ",q);
+			for(var r = 0; r < this.data[q].length; r++){
+				console.log("> ", this.data[q][r].node.print());
+			}
+		}
+	}
+	this.get = function(i){
+		var k=0;
+		for(var q in this.data){
+			for(var r = 0; r < this.data[q].length; r++){
+				if(i == k) return this.data[q][r];
+				k++;
+			}
+		}
+		return null;
+	}
+	this.foreach = function(cbk){
+		for(var q in this.data){
+			for(var r=0; r < this.data[q].length; r++){
+				cbk(this.data[q][r].node, this.data[q][r].children, (q), r);
+			}
+		}
+	}
+}
+
+Transforms.SimplifyConstants = function SimplifyConstants(){
 	/*
 	params: term:XXX term:XXX
 	*/
@@ -194,7 +194,7 @@ Transforms.SimplifyConstants = function(){
 	this.find = function(filter, form){
 		var params = this.make_checker(filter);
 		var unfilt = form.find('type:op');
-		var result = new this.SimplifyConstantsSearchResults();
+		var result = new SimplifyConstantsSearchResults();
 		for(var i in unfilt){
 			var r = this.test(params,unfilt[i]);
 			if(r.ok){
@@ -206,25 +206,31 @@ Transforms.SimplifyConstants = function(){
 	this.apply = function(res){
 		var node = res.node;
 		var children = res.children;
-
+		var res = new ApplyResult();
 		var finalval = node.eval();
 		var form = node.get_formula();
+
 		var newconst = form.add('NUMBER');
 		newconst.set('value', finalval);
 		newconst.set('code', ""+finalval);
 		console.log(finalval);
 		if(children.length == node.children.length){
 			node.replace(newconst.id);
+			res.map(node.id, newconst.id);
+
 		}
 		else{
 			for(var i=0; i < children.length; i++){
 				//remove child with this id.
 				children[i].remove();
+				res.map(children[i].id, newconst.id);
 			}
 			node.add_child(newconst.id, true);
+			res.map(node.id, newconst.id);
 
 		}
 		form.cleanup();
+		return res;
 		
 	}
 	this.init();
@@ -271,7 +277,7 @@ this.DistributeSearchResult = function(){
 	}
 }
 
-Transforms.Distribute = function(){
+Transforms.Distribute = function Distribute(){
 	this.init = function(){
 		
 	}
