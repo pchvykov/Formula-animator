@@ -358,7 +358,6 @@ Transforms.Distribute = function Distribute(){
 		var dest_op =dest.data("op");
 		var src = res.src;
 		var top = src.parent();
-
 		log.mark('paren',dest.id);
 		log.mark('top',top.id);
 		//distribute over dest;
@@ -373,6 +372,9 @@ Transforms.Distribute = function Distribute(){
 			dest.foreach_child(function(c,i){
 				var mul = form.add("MULT");
 				var nc = src.copy();
+
+				c.replace(mul.id);
+
 				mul.add_child(nc.id);
 				mul.add_child(c.id);
 				//add mappings
@@ -380,7 +382,6 @@ Transforms.Distribute = function Distribute(){
 				log.map(c.id,c.id);
 				log.map(null, mul.id);
 				//done
-				c.replace(mul.id);
 			})
 		}
 		else {

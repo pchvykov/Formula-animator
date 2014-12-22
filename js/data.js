@@ -102,6 +102,8 @@ var Node = function Node(f, handle){
 	 * @param {boolean} tofront - whether to add it before the first node.
 	 */
 	this.add_child = function(child_id, tofront){
+		var f = this.formula;
+		f.get(child_id).parent_id = this.id;
 		if(isUndefined(tofront) || ! tofront){
 			if(this.children.indexOf(child_id) < 0)
 				this.children.push(child_id);
@@ -228,7 +230,6 @@ var Node = function Node(f, handle){
 	 */
 	this.set_parent = function(id,tofront){
 		var f = this.formula;
-		this.parent_id = id;
 		var par = f.get(id);
 		if(par != null){
 			par.add_child(this.id,tofront);
