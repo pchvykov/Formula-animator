@@ -293,10 +293,8 @@ function draw_it(form, origin, gui_fl, R, fontz){
 	 */
 function flow_it(R_old, f_new, transf, nice_fl){
 	var R = new Raphael($("#formula_container")[0],screen.width, screen.height/2);
-	console.log(112)
 	var v = scan_tree(f_new, R);
-	console.log(222)
 	display_equation(v, main_eq.origin, main_eq.fontz, true, R_old, transf, nice_fl);
-	if(nice_fl) {set_gui(v, f_new.copy(), R);}
+	if(nice_fl) {set_gui(v, f_new, R);}
 	return v;
 }

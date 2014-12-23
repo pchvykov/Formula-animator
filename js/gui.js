@@ -125,7 +125,7 @@ up = function () {
         var results= rule.find('src:'+holdid+', dest:'+dropid,form)
         if (results.length > 1){console.log('multiple possibilities!!! choosing first one...')}
         // console.log(results, 'results')
-        transf=rule.apply(results.get(0));
+        var transf=rule.apply(results.get(0));
 
         //Draw new eq, no animation-----------------
         SVG.clear();

@@ -58,7 +58,7 @@ $( document ).ready(function() {
             'fontz':30,
             'origin': [50, 80]
         }
-        v = draw_it(form, main_eq.origin, true, SVG, main_eq.fontz);
+        var v = draw_it(form, main_eq.origin, true, SVG, main_eq.fontz);
         main_eq.R_form = v;
 
         // alert("Click to see animation!");
