@@ -7,8 +7,7 @@
 // });
 
 // document.onselectstart = function(){ return false; }
-var v_original
-var v_over
+
 
 
 window.onload = function(){
@@ -26,9 +25,11 @@ window.onload = function(){
         dropid = -1, 
         left = false,
         exec = -1,
-        form, delay, SVG, bubb = Raphael(0,0,1,1);
+        form, delay, SVG, temp_R = Raphael(0,0,1,1),
+        coursor_now, coord_hold =0;
 
-    
+temp_R.remove();
+  
     
 // var tree = { "id": 29, "type": "op", "op": "eq", "code": "=", "left": 
 // { "id": 16, "type": "op", "op": "plus", "code": "+", "left": 
@@ -67,17 +68,12 @@ window.onload = function(){
         }
         else {
             elfn(sel);
-            distributor_set.push(
-                sel);
         }
 
     })
 }
 
-edwin_dummy_function = function(input)
-{
-    console.log(input);
-}
+
 
 /**
      * executes on mouse-down for start of a drag
@@ -96,13 +92,19 @@ var start = function () {
 /**
      * executes on mouse-move for dragging
      */
-move = function (dx, dy, x) {
+move = function (dx, dy, x, y) {
     forEl(this.parent, function(el) {
         el.attr({x: el.ox + dx, y: el.oy + dy})
     });
     if(dropid != -1 && dropid != holdid && dropel.constructor.prototype == Raphael.el){
         left = x < dropel.attr("x") + dropel.getBBox().width / 5;
         console.log(left)
+    }
+
+    coursor_now = [x,y];
+    //Delete the proposed manipulation if move mouse more than threshold:
+    if(temp_R.width != null && Math.abs(coursor_now[0]-coord_hold[0])+Math.abs(coursor_now[1]-coord_hold[1]) >10){
+        temp_R.remove();
     }
     // console.log(this.ox);
 },
@@ -117,18 +119,25 @@ up = function () {
     }
     else{
         clearTimeout(delay);
-        bubb.clear();
         console.log(holdid, dropid, left);
-
-        var rule = new Transforms.Distribute()
-        var results= rule.find('src:'+holdid.toString()+', dest:'+dropid.toString(),form)
+        var temp_form = form.copy();
+        var rule = new Transforms.Distribute();
+        var results= rule.find('src:'+holdid+', dest:'+dropid,form)
         if (results.length > 1){console.log('multiple possibilities!!! choosing first one...')}
         // console.log(results, 'results')
-        rule.apply(results.get(0));
+        var transf=rule.apply(results.get(0));
 
+        //Draw new eq, no animation-----------------
         SVG.clear();
+        var v = draw_it(form, main_eq.origin, true, main_eq.R_form.paper, main_eq.fontz);
+        main_eq.R_form = v;
+        temp_R.remove();
         
-        draw_it(form, [50,30], true, SVG)
+
+        //Create animation box---------------
+
+        add_op(temp_form, form, transf);
+
 
 
     }
@@ -148,31 +157,39 @@ over = function() {//Temporary display of result
     if (-1 != holdid) { 
         dropid = this.id;
         dropel=this;
+
+        //wait for the user to stay there for a bit
         delay = setTimeout(function(){
             //execute the proposed transformation:
             var temp_form = form.copy();
 
             //console.log(temp_form.print(), 'src:'+holdid.toString()+', dest:'+dropid.toString());
+            //console.log(temp_form.print(), 'holdid', holdid, 'dropid', dropid)
+
+            //backend transformation
             var rule = new Transforms.Distribute();
-            results= rule.find('src:'+holdid.toString()+', dest:'+dropid.toString(),temp_form)
+            var results= rule.find('src:'+holdid+', dest:'+dropid, temp_form)
             if (results.length > 1){console.log('multiple possibilities!!! choosing first one...')}
             //console.log(results[0], 'results')
-            
-            rule.apply(results.get(0))
+            var transf = rule.apply(results.get(0))
             //draw_it(form);
             
             //Show transformation in the bubble:
-            xst = dropel.paper.canvas.offsetLeft+dropel.getBBox().x2+20;
-            yst = dropel.paper.canvas.offsetTop+dropel.getBBox().y2 +40;
+            //var xst = dropel.paper.canvas.offsetLeft+dropel.getBBox().x2+20;
+            //var yst = dropel.paper.canvas.offsetTop+dropel.getBBox().y2 +40;
             
-            var v = draw_it(temp_form, [xst, yst])
-            v_over = v;
+            //var v = draw_it(temp_form, [xst, yst])
+            coord_hold = coursor_now;
+
+            //Flow to new eq. from old one
+            var v = flow_it(SVG, temp_form, transf)
+            temp_R = v.paper; // temporary paper to display the tentative transformation
             
 
             //Change font of the bubble equation:
             // bubb.setViewBox(xst,yst, 200,100,true);
         
-            v.attr({opacity: 0.4})
+            //v.attr({opacity: 0.4})
 
         },500);
     };
@@ -186,7 +203,6 @@ out = function() {
 	this.attr({opacity: 1})
     dropid = -1;
     clearTimeout(delay);
-    bubb.clear();
 },
 /**
      * executes on double-click

@@ -52,7 +52,7 @@ function make_room(distributor,distributee,idle_sets)
 			array_of_relative_movements_of_plus_signs[number_of_plus_signs] = multiplier*empty_space_width;
 			BBox_of_plus_signs[number_of_plus_signs] = distributee[index].getBBox(); //Just get the BBox of all the plus signs of the distributee
 			multiplier +=1;
-			console.log('Incremented multiplier');
+			//console.log('Incremented multiplier');
 			number_of_plus_signs += 1;
 
 		}
@@ -62,8 +62,8 @@ function make_room(distributor,distributee,idle_sets)
 		}
 	}
 
-	document.getElementById('button').onclick = function() 
-	{
+	// document.getElementById('button').onclick = function() 
+	// {
 
 		//We need as many clones as there are plus signs.
 		for (var index = 1; index <= number_of_plus_signs; index +=1)
@@ -75,7 +75,7 @@ function make_room(distributor,distributee,idle_sets)
 		//There are two different sets of movements going on here.
 		//1. The distributee items will be moving to "make room"
 		//2. The distributor and its clones will be moving in to the room left by step 1.
-
+		paper = main_eq.R_form.paper;
 		//First use the forEl function to extract all elements of the distributor in to a set.
 		distributor_set = paper.set(); //Create an empty set in to which we will load all the elements of the distributor
 		for_each_element(distributor,distributor_set); //This loads all the elements of the distributor on to distributor_set
@@ -124,12 +124,12 @@ function make_room(distributor,distributee,idle_sets)
 		//This 'for' loop has the effect of calling the animationhandler function on each element of the distributor. This is in order to avoid the 'collapse' problem we had before.
 		for (var i = 0; i <= number_of_plus_signs; i +=1)
 		{
-			console.log(i);
+			//console.log(i);
 			distributor_set = paper.set(); //Create an empty set in to which we will load all the elements of the distributor
 			for_each_element(array_of_clones[i],distributor_set); //This loads all the elements of the clone onto distributor_set
 			for (var k = 0; k <= distributor_set.length-1; k += 1)
 			{
-				console.log(k);
+				//console.log(k);
 				var Ex = table_of_distributor_element_final_positions[i][k];
 				path = new AnimationHandler_2().animate_along_a_path(distributor_set[k], Ex, Ey);
 			}
@@ -152,7 +152,7 @@ function make_room(distributor,distributee,idle_sets)
 			var Ey = Ey_original_clone;
 			//path = new AnimationHandler_2().animate_along_a_path(array_of_clones[index], BBox_of_plus_signs[index-1].x + array_of_relative_movements_of_plus_signs[index - 1]  , BBox_of_plus_signs[index-1].y);
 			//path = new AnimationHandler_2().animate_along_a_path(array_of_clones[index], Ex, Ey);
-			console.log(index);
+			//console.log(index);
 		}
 
 		//Below is a "for" loop that animates "make room"
@@ -160,7 +160,7 @@ function make_room(distributor,distributee,idle_sets)
 		{
 			distributee[index].animate({transform: "t" + array_of_relative_movements[index] + "," + "0"}, 1000);
 		}
-	};
+	//};
 
 
 	return;
