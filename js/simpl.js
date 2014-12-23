@@ -106,7 +106,25 @@ Transform = function(){
 }
 
 Transforms = {};
+MoveTermSearchResults = function(){
+	this.data = {};
+	this.add = function(eq,t_move, t_after){
+		var res = r.find('op:eq');
+		var len = 0;
+		for(var q in res){
+			var has_movable;
+			len++;
+		}
+		if(!this.data.hasOwnProperty(len)){
+			this.data[len] = [];
+		}
+		this.data[0].push({eq:eq,src:t_move,after:t_after});
+	}
+	this.print = function(){
 
+	}
+
+}
 Transforms.MoveTerm = function(){
 
 }
