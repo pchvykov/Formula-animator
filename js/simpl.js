@@ -48,11 +48,10 @@ ApplyResult = function(name){
 		if(!(new_id in this.m)){
 			for(var i=0; i < this.m.add.length; i++){
 				if(this.m.add[i] == new_id){
-					return null;
+					return null; 
 				}
 			}
-			//return undefined;
-			return new_id;
+			return undefined;
 		}
 		return this.m[new_id];
 	}
@@ -376,9 +375,9 @@ Transforms.Distribute = function Distribute(){
 		var dest = res.dest.child(0);  //get inside the parenthesis
 		var dest_op =dest.data("op");
 		var src = res.src;
-
+		var top = src.parent();
 		log.mark('paren',dest.id);
-		log.mark('top',src.id);
+		log.mark('top',top.id);
 		//distribute over dest;
 		if(dest_op== "mult"){
 			dest.foreach_child(function(c,i){
