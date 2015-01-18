@@ -51,7 +51,8 @@ ApplyResult = function(name){
 					return null; 
 				}
 			}
-			return undefined;
+			//return undefined;
+			return new_id;
 		}
 		return this.m[new_id];
 	}
@@ -375,9 +376,9 @@ Transforms.Distribute = function Distribute(){
 		var dest = res.dest.child(0);  //get inside the parenthesis
 		var dest_op =dest.data("op");
 		var src = res.src;
-		var top = src.parent();
+		//var top = src.parent();
 		log.mark('paren',dest.id);
-		log.mark('top',top.id);
+		log.mark('top',src.id);
 		//distribute over dest;
 		if(dest_op== "mult"){
 			dest.foreach_child(function(c,i){
