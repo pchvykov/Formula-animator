@@ -1,6 +1,5 @@
 
 
-
 ApplyResult = function(name){
 	this.init = function(name){
 		this.name = name;
@@ -68,6 +67,7 @@ ApplyResult = function(name){
 Transform = function(){
 	/*
 	find all possible applications of this transformation
+	a:b c:d 
 	*/
 	this.make_checker = function(filter){
 		var sexpr = filter.split(' ');
@@ -121,6 +121,7 @@ MoveTermSearchResults = function(){
 		}
 		this.data[0].push({eq:eq,src:t_move,after:t_after});
 	}
+
 	this.print = function(){
 
 	}
@@ -181,6 +182,7 @@ Transforms.SimplifyConstants = function SimplifyConstants(){
 	this.init = function(){
 
 	}
+	//test if transformation applies
 	this.test = function(params,node){
 		var factor = null;
 		var numbers = [];
@@ -210,6 +212,8 @@ Transforms.SimplifyConstants = function SimplifyConstants(){
 		return {ok:true, children:numbers, node:node};
 
 	}
+	//find all the subtrees that abide by the filter that we can apply
+	//the transformation to
 	this.find = function(filter, form){
 		var params = this.make_checker(filter);
 		var unfilt = form.find('type:op');
@@ -222,6 +226,7 @@ Transforms.SimplifyConstants = function SimplifyConstants(){
 		}
 		return result;
 	}
+	//apply the transformation to the subtree
 	this.apply = function(res){
 		var node = res.node;
 		var children = res.children;
