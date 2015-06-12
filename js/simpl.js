@@ -26,7 +26,7 @@ ApplyResult = function(name){
 		}
 		this.m[newid] = oldid;
 	}
-	this.to = function(old_id){
+ 	this.to = function(old_id){
 		var res = [];
 		for(id in this.m){
 			if(id != "del" && id != "add" && this.m[id] == old_id){
@@ -64,10 +64,12 @@ ApplyResult = function(name){
 	this.init(name);
 }
 
+//Parent class def for any sort of transformation:
 Transform = function(){
 	/*
 	find all possible applications of this transformation
-	a:b c:d 
+	takes input of form: a:b c:d 
+	outputs a dictionary with the corresponding entries (e.g., dict['a'] = b (I think?))
 	*/
 	this.make_checker = function(filter){
 		var sexpr = filter.split(' ');
@@ -274,7 +276,9 @@ this.DistributeSearchResult = function(){
 
 	this.get = function(id){
 		var k=0;
-		for(var dist in this.data){
+		//note: dist is the horizontal distance between distributing objects. Eg, for non-commutative, force dist==1
+		for(var dist in this.data){ //this way, dist takes on all posslbe labels in the dictionary this.data
+			//console.log(dist, this.data[dist].length)
 			for(var i=0; i < this.data[dist].length; i++){
 				if(k == id){
 					return {src:this.data[dist][i].src, dest:this.data[dist][i].dest, dist:dist};
@@ -301,6 +305,7 @@ this.DistributeSearchResult = function(){
 	}
 }
 
+//Child class def for the distribution manipulation:
 Transforms.Distribute = function Distribute(){
 	this.init = function(){
 		
@@ -308,16 +313,22 @@ Transforms.Distribute = function Distribute(){
 	/*
 	params: src:XXX src:XXX dest:XXX
 	*/
+	//Check if the subtree starting from root "node" matches the form for distribution
+	//and contains all the nodes specified in the restriction dictionary "params"
 	this.test = function(params,node){
+		
+		//n - top node, t - constraint nodes, mparan - bool: require parenthesis? (yes for destination, but not source)
 		var test_param = function(n,t,mparan){
 			var result = {};
 			var result_count = 0;
 			var found = {};
+			//console.log(mparan, " node ", n.print(), t)
 			n.foreach_child(function(c,idx){
 				var isOk = true;
-				//ensure contains all children.
+				//ensure the branch contains all constraints:
 				for(var i=0; i < t.length; i++){
 					var res = c.find("#"+t[i]);
+					//console.log("count keys", "#"+t[i], countKeys(c.find("#"+t[i])))
 					if(countKeys(res) == 0) isOk = false;
 				}
 				//make sure contains all the terms, and if we require parenthesis, require
@@ -331,7 +342,8 @@ Transforms.Distribute = function Distribute(){
 
 
 		if(!params.hasOwnProperty('src')){
-			params.src = [];	
+			params.src = [];
+			//console.log("must have one source and one destination to distribute!")	
 		}
 		else if (!(params.src instanceof Array)){
 			params.src = [params.src];
@@ -340,6 +352,7 @@ Transforms.Distribute = function Distribute(){
 		
 		if(!params.hasOwnProperty('dest')){
 			params.dest = [];
+			//console.log("must have one source and one destination to distribute!")	
 		}
 		else if (!(params.dest instanceof Array)){
 			params.dest = [params.dest];
@@ -347,12 +360,16 @@ Transforms.Distribute = function Distribute(){
 
 		var sources = test_param(node,params.src,false);
 		var dests = test_param(node,params.dest,true);
-
-		return {src:sources, dest:dests, ok:(dests.count != 0 && sources.count != 0)};
+		//console.log("counting ", sources.count, dests.count)
+		return {src:sources, dest:dests, 
+			ok:(dests.count != 0 && sources.count != 0 )};
 
 	}
+	//Find all possible distributions on the formula, restricted by the filter condition
 	this.find = function(filter, form){
+		//create dictionary containing the constraint info:
 		var params = this.make_checker(filter);
+		//find all multiplication nodes in formula
 		var unfilt = form.find('type:op op:mult');
 		var result = new DistributeSearchResult();
 
@@ -361,7 +378,7 @@ Transforms.Distribute = function Distribute(){
 			if(res.ok){
 				for(var si in res.src.data){
 					for(var sj in res.dest.data){
-						var i = parseInt(si);
+						var i = parseInt(si); //converts string to integer
 						var j = parseInt(sj);
 						if(i != j){
 							result.add(i,res.src.data[si],j,res.dest.data[sj]);

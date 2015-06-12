@@ -20,6 +20,7 @@ var ops = new Array();
 var orig = [15,30]; step = 50; 
 
 //Execute on double-click
+//Draws the pre-transoformation formula, and animates the transformation
 var run_anim = function(){
 	this.attr({cursor: "default"})
 	var R = main_eq.R_form.paper;

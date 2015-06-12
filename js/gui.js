@@ -98,7 +98,7 @@ move = function (dx, dy, x, y) {
     });
     if(dropid != -1 && dropid != holdid && dropel.constructor.prototype == Raphael.el){
         left = x < dropel.attr("x") + dropel.getBBox().width / 5;
-        console.log(left)
+        //console.log(left)
     }
 
     coursor_now = [x,y];
@@ -112,21 +112,25 @@ move = function (dx, dy, x, y) {
      * executes on mouse-up at the end of a drag
      */
 up = function () {
+    //if not hovering, drop back to starting location:
     if(dropid == -1 || dropid == holdid) {
         forEl(this.parent, function(el) {
             el.attr({x: el.ox, y: el.oy})
         });
     }
+    //else, update the formula:
     else{
         clearTimeout(delay);
-        console.log(holdid, dropid, left);
+        //console.log(holdid, dropid, left);
         var temp_form = form.copy();
         var rule = new Transforms.Distribute();
-        var results= rule.find('src:'+holdid+', dest:'+dropid,form)
-        if (results.length > 1){console.log('multiple possibilities!!! choosing first one...')}
+        var results= rule.find('src:'+holdid+' dest:'+dropid,form)
+        if (results._len > 1){console.log('multiple possibilities!!! choosing first one...')}
         // console.log(results, 'results')
         var transf=rule.apply(results.get(0));
-
+        console.log(form.print(1))
+        form.cleanup_and_reassign();
+        console.log(form.print(1))
         //Draw new eq, no animation-----------------
         SVG.clear();
         var v = draw_it(form, main_eq.origin, true, main_eq.R_form.paper, main_eq.fontz);
@@ -168,8 +172,8 @@ over = function() {//Temporary display of result
 
             //backend transformation
             var rule = new Transforms.Distribute();
-            var results= rule.find('src:'+holdid+', dest:'+dropid, temp_form)
-            if (results.length > 1){console.log('multiple possibilities!!! choosing first one...')}
+            var results= rule.find('src:'+Math.floor(holdid)+' dest:'+Math.floor(dropid), temp_form)
+            if (results._len > 1){console.log(results._len+' possibilities!!! choosing first one...')}
             //console.log(results[0], 'results')
             var transf = rule.apply(results.get(0))
             //draw_it(form);

@@ -23,7 +23,7 @@ function create_node(inp, parent_set, paper){
 }
 
 /**
-	 * Scan the master tree and return the Raphael tree for it
+	 * Scan the master tree and return the Raphael tree for it (but not displayed yet)
 	 * @param {tree} input - the master tree
 	 * @param {paper} paper - Raphael paper to create tree in
 	 */
@@ -108,7 +108,7 @@ function display_equation(parent_set,origin, fontz, flow_fl, R_old, transf, nice
 	//scan_tree and then displays the text as Raphael SVG text objects. 
 	//Basically, it's just a matter of assigning the right coordinates to those text elements that were already generated
 	flow_fl = typeof flow_fl !== 'undefined' ? flow_fl : false; //attach gui to object?
-	console.log(flow_fl)
+	//console.log(flow_fl)
 	var font_size = fontz;
 	var offset = fontz/3;
 	var anim_t = 500, long_anim_t = 2500; //time in ms for the flow animation; long for nice one

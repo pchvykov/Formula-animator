@@ -1,5 +1,5 @@
 /**
- * What does this function do?
+ * Create a class the nodes of the master tree
  * @constructor
  * @param {string} f - What does f represent?
  * @param {string} handle - What does handle represent?
@@ -77,7 +77,6 @@ var Node = function Node(f, handle){
 	 * iterate over all the children in left-right order, invoking function cbk.
 	 * @param {function} cbk - a function that takes in a (Node,number), where the
 	 node is the child node, the number is the position.
-	 * @param {string} handle - What does handle represent?
 	 */
 	this.foreach_child = function(cbk){
 		var f = this.formula;
@@ -254,17 +253,23 @@ var Node = function Node(f, handle){
 	 * Print the node and all its children (outputs the formula)
 	 * + -> a+b+c
 	 */
-	this.print = function(){
+	this.print = function(lev, fl){
 		var f = this.formula;
 		var str = "";
 		var type = this.data('type');
 		var op = this.data('op');
+		var curr_node=this;
+		var show = function(ch){
+			if(isUndefined(fl)) return ch;
+			else return "{"+lev+"," + curr_node.get_id() + "}" + ch +" ";
+		}
+
 		if(type == "op" && op == "paren"){
 			var chl = f.get(this.children[0]);
 			if(chl != null){
-				str += "(";
-				str += chl.print();
-				str += ")";
+				str += show("(");
+				str += chl.print(lev+1,fl);
+				str += show(")");
 			}
 		}
 		else if(type == 'op'){
@@ -272,22 +277,22 @@ var Node = function Node(f, handle){
 				if(!f.has(this.children[i])) continue;
 				var chl = f.get(this.children[i]);
 				if(i > 0){
-					str += (this.data('code'));
+					str += show(this.data('code'));
 				}
-				str += chl.print();
+				str += chl.print(lev+1,fl);
 			}
 		}
 		else if(type == 'variable'){
-			str = this.data('code');
+			str = show(this.data('code'));
 		}
 		else if(type == 'number'){
-			str = (this.data('code'));
+			str = show(this.data('code'));
 		}
 		return str;
 	}
 	/**
 	 * find all the nodes that are descendents of this node, including this node.
-	 * TODO: change function name to descendents.
+	 * TODO: RENAME FUNCTION??
 	 */
 	this.ancestors = function(){
 		var f = this.formula;
@@ -298,7 +303,7 @@ var Node = function Node(f, handle){
 				a[child_id] = child;
 
 				var anc = ancestors(child);
-				for(var ancestor in anc){
+				for(var ancestor in anc){ //ancestor takes on the id values 
 					a[ancestor] = anc[ancestor];
 				}
 			});
@@ -482,6 +487,7 @@ var Formula = function Formula(){
 		}
 		return predicates;
 	}
+	//Returns nodes matching criteria in exp from the form subtree (entire formula by default)
 	this.find = function(exp, from){
 		var checker = this.to_checker(exp);
 		var nodes = {};
@@ -505,8 +511,9 @@ var Formula = function Formula(){
 	this.toString = function(){
 		return JSON.stringify(this.nodes,null,2);
 	}
-	this.print = function(){
-		return this.root().print(this);
+	//set fl to anything to display levels with each node:
+	this.print = function(fl){
+		return this.root().print(0,fl);
 	}
 
 	this.cleanup_and_reassign = function(){

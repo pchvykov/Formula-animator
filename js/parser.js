@@ -12,6 +12,7 @@ var mock1 = {
 	}
 }
 
+//read up on http://en.wikipedia.org/wiki/Parsing_expression_grammar to get how this works
 Parser = function(){
 	//takes text, turns it into tree
 
