@@ -16,7 +16,7 @@ get the id of top node of expression being distributed
 */
 
 //Array to store the operations:
-var ops = new Array();
+ops = new Array();
 var orig = [15,30]; step = 50; 
 
 //Execute on double-click
@@ -29,15 +29,19 @@ var run_anim = function(){
 	//console.log(ops[n].old.print())
 
 	//Draw the original formula
-	var v = draw_it(ops[n].oldf.copy(), main_eq.origin, true, R, main_eq.fontz);
+	var oldf = ops[n].oldf.copy();
+	var v = draw_it(oldf, main_eq.origin, true, R, main_eq.fontz);
+	//console.log(ops[n].oldf.print(true), "\n", ops[n].newf.print(true))
 
     //sleep(1000);
     document.getElementById('button').onclick = function() {
     //console.log(110, n, ops[n].new)
     // setTimeout(function())
-    v=flow_it(R, ops[n].newf, ops[n].transf, true);
-    R.remove();
-    main_eq.R_form = v;
+    	var newf = ops[n].newf.copy();
+	    v=flow_it(R, newf, ops[n].transf, true);
+	    R.remove();
+	    main_eq.R_form = v;
+	    n++;
 	}
 
 	//make_room(SVG.getById(ops[n].transf.get('top')).parent, SVG.getById(ops[n].transf.get('paren')).parent,0);

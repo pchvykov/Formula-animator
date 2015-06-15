@@ -93,7 +93,11 @@ var Node = function Node(f, handle){
 	 */
 
 	this.add_child_before = function(child_id, j){
-		this.children.splice(j,0,child_id);
+		var f = this.formula;
+		f.get(child_id).parent_id = this.id;
+		if(this.children.indexOf(child_id) < 0){
+			this.children.splice(j,0,child_id);
+		}
 	}
 	/**
 	 * Add a child to the leftmost or rightmost position.
@@ -119,12 +123,19 @@ var Node = function Node(f, handle){
 		return this.children.length;
 	}
 	/**
-	 * remove the child at position j. This does not change the parent id of the child.
+	 * remove the child at position j. 
 	 * @param {string} j - position of child to remove.
 	 */
 	this.remove_child = function(j){
 		var f = this.formula;
-		if(j >= 0) this.children.splice(j,1); // removes that child.
+		var chil;
+		if(j >= 0) {
+			chil = this.children[j];
+			//console.log(this.children)
+			chil.parent = -1;
+			this.children.splice(j,1); // removes that child.
+		}
+		return chil;
 	}
 	/**
 	 * Initialize the node.
@@ -179,10 +190,11 @@ var Node = function Node(f, handle){
 		if(par != null){
 			par.add_child_before(new_id, par.get_index(this.id));
 			par.remove_child(par.get_index(this.id));
-			this.parent_id = -1;
 			f.get(new_id).parent_id = this.parent_id;
+			this.parent_id = -1;
 		}
 		else{
+			console.error("replacing root element?!")
 			f.get(new_id).parent_id = -1;
 			if(f.root().id == this.id){
 				f.set_root(new_id);
@@ -199,6 +211,12 @@ var Node = function Node(f, handle){
 			var par = this.parent();
 			par.remove_child(par.get_index(this.id));
 			this.parent_id = -1;
+			//cleanup if leaving an orphaned * or +. moved to flatten():
+			/*if((par.data('op') === 'mult' || par.data('op') === 'plus') && par.n_children() == 1){
+				var grandpa = par.parent();
+				grandpa.add_child_before(par.children[0], grandpa.get_index(par.id));
+				par.remove();
+			}*/
 		}
 		else
 			this.replace(child_to_moveup);
@@ -252,6 +270,7 @@ var Node = function Node(f, handle){
 	/**
 	 * Print the node and all its children (outputs the formula)
 	 * + -> a+b+c
+	 * lev - specifies current level in the tree, fl - true to display level and id
 	 */
 	this.print = function(lev, fl){
 		var f = this.formula;
@@ -292,7 +311,7 @@ var Node = function Node(f, handle){
 	}
 	/**
 	 * find all the nodes that are descendents of this node, including this node.
-	 * TODO: RENAME FUNCTION??
+	 * TODO: RENAME FUNCTION to descendents
 	 */
 	this.ancestors = function(){
 		var f = this.formula;
@@ -320,13 +339,35 @@ var Node = function Node(f, handle){
 	 * @param {Formula} f - Formula to add node to.
 	 */
 	this.copy = function(nf){ // copy into potentially new Formula
-		if(isUndefined(nf)) nf = this.formula;
+		//var n_id = this.id; 
+		if(isUndefined(nf)) {
+			nf = this.formula;
+		}
+		//if(nf === this.formula) n_id = this.new_id(1)[0];
 		var n = nf.add(this.HANDLE);
 		n._data = copyData(this._data);
 		n.children = copyData(this.children);
 		n.parent_id = this.parent_id;
+		//n.id = n_id; 
+		//console.log(n.id)
 		return n;
 	}
+
+	
+	//create a new unique id for a node (num - number of ids to return):
+	/*this.new_id = function(num){
+		var f = this.formula;
+		var old_ids=[];
+		var new_ids=[];
+		for (var id in f.nodes) old_ids.push(id);
+		var i = old_ids.length;
+		while (new_ids.length < num){
+			if(old_ids.indexOf(i.toString()) < 0) new_ids.push(i.toString());
+			i++;
+		}
+		return new_ids;
+	}*/
+	
 
 	this.set_formula = function(f){
 		this.formula = f;
@@ -343,7 +384,7 @@ var Node = function Node(f, handle){
 		cbk(this);
 		this.foreach_child(function(node){
 			cbk(node);
-			node.foreach_subtree(node);
+			node.foreach_subtree(cbk);
 		});
 	}
 	/**
@@ -364,20 +405,24 @@ var Node = function Node(f, handle){
 		}
 		return -1;
 	}
-	this.copy_subtree = function(nf){ //copy into potentially new tree
+	this.copy_subtree = function(nf, log){ //copy into potentially new tree, and log in tranformation
 		var f = this.formula;
+		//console.log(f.print())
 		var anc = this.ancestors();
 		var mappings = {};
 		var nodes = {};
 		//copy all elements
 		for(a in anc){
 			var el = anc[a].copy(nf);
+			//console.log("id check ",a,anc[a].id)
 			mappings[anc[a].id] = el.id;
+			if (!isUndefined(log)) log.map(anc[a].id, el.id);
 			nodes[el.id] = el;
 		}
 		if(this.id == f.root().id){
 			nf.set_root(mappings[this.id]);
 		}
+		//set relationships:
 		for(var nid in nodes){
 			var n = nodes[nid];
 			if(n.parent_id in mappings){
@@ -388,172 +433,16 @@ var Node = function Node(f, handle){
 			}
 			n.foreach_child(function(child,i){
 				if(child.id in mappings){
-					n.children[i] = child.id;
+					n.children[i] = mappings[child.id];
+					//console.log("new id ", child.id)
 				}
 				else{
 					n.children[i] = -1;
 				}
 			})
 		}
-		return nodes;
+		//console.log(nodes[mappings[this.id]].parent_id)
+		return nodes[mappings[this.id]];
 	}
 	this.init(f,handle);
-}
-var Formula = function Formula(){
-
-	this.init = function(){
-		this.nodes = {};
-		this.ID = 0;
-		this.root_id = -1;
-	}
-	this.has = function(id){
-		return (id in this.nodes);
-	}
-	this.set_root = function(id){
-		this.root_id = id;
-	}
-	this.root = function(){
-		return this.get(this.root_id);
-	}
-	this.add = function(handle){
-		var node = new Node(this, handle);
-		this.nodes[node.id] = node;
-		return node;
-	}
-	this.fresh_id = function(){
-		var id= this.ID;
-		this.ID++;
-		return id;
-	}
-	this.get = function(id){
-		if(this.has(id)) return this.nodes[id];
-		else return null;
-	}
-	this.copy = function(){
-		var f = new Formula();
-		this.root().copy_subtree(f);
-		return f;
-	}
-
-	/*
-	# #id : id number of a node
-	# field:val : field is a particular value
-	# %parent_id : is child of this parent.
-	# %%ancestor_id : is an ancestor of this parent.
-	# a b : a and b
-	# a,b : a or b
-	*/
-	this.to_checker = function(exp){
-		var combine = function(a,b){return a||b};
-		var subexp = exp.split(",");
-		if(subexp.length == 1){
-			var combine = function(a,b){return a&&b};
-			subexp = exp.split(' ');
-		}
-		var predicates = function(){return true;};
-		for(var i=0; i < subexp.length; i++){
-			var pred = subexp[i];
-			if(pred.startsWith("#")){
-				var check_id = parseInt(pred.substring(1))
-				var new_pred = (function(comb,prev, checkid){
-					return function(node){return comb( prev(node), checkid==node.id) }
-				})(combine,predicates,check_id);
-				predicates = new_pred;
-			}
-			else if(pred.startsWith("%%")){
-				var check_id = parseInt(pred.substring(2));
-				var anc = this.get(check_id).ancestors(this);
-				var new_pred = function(comb,prev, anc){
-					return function(node){return comb( prev(node), node.id in anc) }
-				}(combine,predicates,anc);
-				var predicates = new_pred;
-			}
-			else if(pred.startsWith("%")){
-				var check_id = parseInt(pred.substring(1));
-				var new_pred = function(comb,prev, checkid){
-					return function(node){return comb( prev(node), checkid==node.parent_id) }
-				}(combine,predicates,check_id);
-				var predicates = new_pred;
-			}
-			else {
-				var args = pred.split(":");
-				var key = args[0];
-				var value = args[1];
-				var new_pred = (function(comb,prev, key,value){
-					return function(node){return comb( prev(node), node.data(key) == value) }
-				})(combine,predicates,key, value);
-				var predicates = new_pred;
-			}
-		}
-		return predicates;
-	}
-	//Returns nodes matching criteria in exp from the form subtree (entire formula by default)
-	this.find = function(exp, from){
-		var checker = this.to_checker(exp);
-		var nodes = {};
-		if(isUndefined(from)){
-				for(n in this.nodes){
-					nodes[n] = this.nodes[n];
-				}
-		}
-		else{
-			nodes = from;
-		}
-		for(id in nodes){
-			if(!checker(nodes[id])){
-				delete nodes[id];
-			}
-		}
-		return nodes;
-	}
-
-
-	this.toString = function(){
-		return JSON.stringify(this.nodes,null,2);
-	}
-	//set fl to anything to display levels with each node:
-	this.print = function(fl){
-		return this.root().print(0,fl);
-	}
-
-	this.cleanup_and_reassign = function(){
-		var tree = this.root().ancestors();
-		var cnt = 0;
-		var mapping = {};
-		//initialize to 0
-		for(var id in this.nodes){
-			if(! (id in tree)){
-				delete this.nodes[id];
-			}
-			else{
-				mapping[id] = cnt;
-				cnt++;
-			}
-		}
-		for(var id in this.nodes){
-			var node = this.nodes[id];
-			node.id = mapping[node.id];
-			node.parent_id = mapping[node.parent_id];
-			for(var i=0; i < node.children.length; i++){
-				node.children[i] = mapping[node.children[i]];
-			}
-			delete this.nodes[id];
-			this.nodes[mapping[id]] = node;
-
-
-		}
-		this.root_id = mapping[this.root_id];
-		this.ID = cnt;
-	}
-	this.cleanup = function(){
-		var tree = this.root().ancestors();
-		//initialize to 0
-		for(var id in this.nodes){
-			if(! (id in tree)){
-				delete this.nodes[id];
-			}
-		}
-
-	}
-	this.init();
 }

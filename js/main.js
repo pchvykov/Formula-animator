@@ -1,4 +1,4 @@
-
+/*
 function sleep(milliseconds) {
   var start = new Date().getTime();
     while ((new Date().getTime() - start) < milliseconds){
@@ -25,7 +25,7 @@ var BindActionHandlerToSVG = function(sv, data){
 	})
 	return a;
 }
-
+*/
 
 var SVG = null;
 $( document ).ready(function() {
@@ -45,21 +45,24 @@ $( document ).ready(function() {
     $("#formula_latex").change(function(){
         SVG.clear();
     	var data = $("#formula_latex").val().substr();
-    	form = parser.parse(data);
-    	var form_str = form.print();
+      eq0 = new Equation(data,SVG,[50,50]);
+      eq0.display();
+    	//form = parser.parse(data);
+        //console.log(form.nodes[1].new_id(5))
+    	//var form_str = form.print();
     	// $("#formula_latex_debug").html(form_str);
-    	console.log(form.print(1));
+    	console.log(eq0.master.print(1));
        // alert("I am an alert box!");
 
 
        //Global variable with info about the main euqations on screen (handle for the formula, font size, position in SVG paper):
-       main_eq = {
-            'R_form':0,
-            'fontz':30,
-            'origin': [50, 80]
-        }
-        var v = draw_it(form, main_eq.origin, true, SVG, main_eq.fontz);
-        main_eq.R_form = v;
+       // main_eq = {
+       //      'R_form':0,
+       //      'fontz':30,
+       //      'origin': [50, 80]
+       //  }
+       //  var v = draw_it(form, main_eq.origin, true, SVG, main_eq.fontz);
+       //  main_eq.R_form = v;
 
 
     

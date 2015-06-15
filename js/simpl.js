@@ -14,6 +14,7 @@ ApplyResult = function(name){
 	this.get = function(name){
 		return this.l[name];
 	}
+	//note: storing creation/deletion of nodes seperately
 	this.map  = function(oldid,newid){
 		if(isUndefined(newid)) return;
 		if(newid == null){
@@ -50,8 +51,8 @@ ApplyResult = function(name){
 					return null; 
 				}
 			}
-			//return undefined;
-			return new_id;
+			//return new_id;
+			return undefined
 		}
 		return this.m[new_id];
 	}
@@ -61,6 +62,12 @@ ApplyResult = function(name){
 	this.del_ids = function(){
 		return this.m.del;
 	}
+	this.map_repl_new_el = function(new1,new2){
+		this.m[new2]=this.m[new1];
+		//console.log(typeof this.m.del)
+		delete this.m.new1;
+		return;
+	}
 	this.init(name);
 }
 
@@ -69,7 +76,7 @@ Transform = function(){
 	/*
 	find all possible applications of this transformation
 	takes input of form: a:b c:d 
-	outputs a dictionary with the corresponding entries (e.g., dict['a'] = b (I think?))
+	outputs a object with the corresponding entries (e.g., obj['a'] = b (I think?))
 	*/
 	this.make_checker = function(filter){
 		var sexpr = filter.split(' ');
@@ -267,7 +274,7 @@ this.DistributeSearchResult = function(){
 	this.data = {};
 	this._len = 0;
 	this.add = function(i,s,j,d){
-		var dist = Math.abs(i-j);
+		var dist = j-i;//Math.abs(i-j);
 		if(!this.data.hasOwnProperty(dist))
 			this.data[dist] = [];
 		this.data[dist].push({src:s,dest:d});
@@ -390,6 +397,7 @@ Transforms.Distribute = function Distribute(){
 		//print results
 		return result;
 	}
+	//apply the transformation res and return the log file
 	this.apply = function(res){
 		var factor;
 		var form = res.dest.get_formula();
@@ -402,9 +410,10 @@ Transforms.Distribute = function Distribute(){
 		log.mark('paren',dest.id);
 		log.mark('top',src.id);
 		//distribute over dest;
+		var nc = src.copy_subtree(undefined, log); //and log the mappings
 		if(dest_op== "mult"){
 			dest.foreach_child(function(c,i){
-				var nc = src.copy();
+				
 				mul.add_child_before(nc.id, c.id);
 				log.map(src.id, nc.id);
 			})
@@ -412,15 +421,30 @@ Transforms.Distribute = function Distribute(){
 		else if(dest_op == "sub" || dest_op == "plus"){
 			dest.foreach_child(function(c,i){
 				var mul = form.add("MULT");
-				var nc = src.copy();
+				
+				//console.log("new node", nc)
+				//console.log(nc.print(0,true))
 
+				//replace each child with a multipliation node in the tree:
 				c.replace(mul.id);
 
-				mul.add_child(nc.id);
-				mul.add_child(c.id);
-				//add mappings
-				log.map(src.id, nc.id);
-				log.map(c.id,c.id);
+				//preserve the order of terms:
+				if(res.dist > 0){
+					mul.add_child(nc.id);
+					mul.add_child(c.id);
+				}
+				else {
+					mul.add_child(c.id);
+					mul.add_child(nc.id);
+				}
+				//console.log("child", c)
+				//add mappings:
+				/*var o_nodes=src.ancestors();
+				var n_nodes=nc.ancestors();
+				for (anc in o_nodes){
+					log.map(o_nodes[anc].id, n_nodes[anc].id);
+				}*/
+				//log.map(c.id,c.id);
 				log.map(null, mul.id);
 				//done
 			})
@@ -436,7 +460,11 @@ Transforms.Distribute = function Distribute(){
 		}
 		//remove the source from the products.
 		src.remove();
-		form.cleanup();
+		//form.cleanup();
+		for (var n in form.nodes) {
+			if (isUndefined(log.from(form.nodes[n].id))) {log.map(form.nodes[n].id, form.nodes[n].id);}
+		}
+		form.cleanup_and_reassign(log);
 		return log;
 
 	}
