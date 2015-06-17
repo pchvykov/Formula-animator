@@ -4,7 +4,7 @@
  * @param {string} f - What does f represent?
  * @param {string} handle - What does handle represent?
  */
-var Node = function Node(f, handle){
+var Node = function Node(f, handle, nid){
 	//ids of children
 	this.NODE ={
 			base: {type:'unknown', code:'?'},
@@ -81,8 +81,11 @@ var Node = function Node(f, handle){
 	this.foreach_child = function(cbk){
 		var f = this.formula;
 		for(var i=0; i < this.children.length; i++){
-			if(f.has(this.children[i]))
-				cbk(f.get(this.children[i]),i);
+			//if(f.has(this.children[i])){
+			if(!f.has(this.children[i])) console.error("lost child", this.children[i], "of", this, "in", f.nodes)
+			cbk(f.get(this.children[i]),i);
+			//}
+			//else console.error("lost a child...")
 		}
 	}
 	/**
@@ -143,7 +146,7 @@ var Node = function Node(f, handle){
 	 * @param {Formula} f - the formula to add the node to.
 	 * @param {String} handle - The type of node to add. Must be a key in NODES.
 	 */
-	this.init = function(f,handle){
+	this.init = function(f,handle, nid){
 		var that = this;
 		var cobble_data = function(data,name){
 			var node = {}; //copy base info.
@@ -172,7 +175,11 @@ var Node = function Node(f, handle){
 		}
 		var data = cobble_data(this.NODE,'NODE').data;
 		this.HANDLE = handle;
-		this.id = f.fresh_id();
+		if (isUndefined(nid)) this.id = f.fresh_id();
+		else {
+			if(nid in f.nodes) log.error("warning: overwriting an existing node!")
+			this.id = nid; 
+		}
 		this.parent_id = -1;
 		this.children = [];
 		this.formula = f;
@@ -279,8 +286,13 @@ var Node = function Node(f, handle){
 		var op = this.data('op');
 		var curr_node=this;
 		var show = function(ch){
-			if(isUndefined(fl)) return ch;
-			else return "{"+lev+"," + curr_node.get_id() + "}" + ch +" ";
+			if(fl === 5.78) {
+				var nid = curr_node.get_id();
+				if (nid < 10) return "{"+lev+"," + curr_node.get_id() + " } ";
+				else return "{"+lev+"," + curr_node.get_id() + "} ";
+			}
+			if (fl) return "   " + ch + "   ";
+			return ch;
 		}
 
 		if(type == "op" && op == "paren"){
@@ -293,7 +305,7 @@ var Node = function Node(f, handle){
 		}
 		else if(type == 'op'){
 			for(var i in this.children){
-				if(!f.has(this.children[i])) continue;
+				if(!f.has(this.children[i])) {console.error("lost a child..");}
 				var chl = f.get(this.children[i]);
 				if(i > 0){
 					str += show(this.data('code'));
@@ -311,24 +323,23 @@ var Node = function Node(f, handle){
 	}
 	/**
 	 * find all the nodes that are descendents of this node, including this node.
-	 * TODO: RENAME FUNCTION to descendents
 	 */
-	this.ancestors = function(){
+	this.descendants = function(){
 		var f = this.formula;
-		var ancestors = function(d){
+		var descendants = function(d){
 			var a = {};
 			d.foreach_child(function(child){
 				var child_id = child.id;
 				a[child_id] = child;
 
-				var anc = ancestors(child);
-				for(var ancestor in anc){ //ancestor takes on the id values 
-					a[ancestor] = anc[ancestor];
+				var desc = descendants(child);
+				for(var descendant in desc){ //descendant takes on the id values 
+					a[descendant] = desc[descendant];
 				}
 			});
 			return a;
 		}
-		var a = ancestors(this);
+		var a = descendants(this);
 		a[this.id] = this;
 		return a;
 
@@ -338,13 +349,13 @@ var Node = function Node(f, handle){
 	 * is provided, the formula the current node belongs to is used.
 	 * @param {Formula} f - Formula to add node to.
 	 */
-	this.copy = function(nf){ // copy into potentially new Formula
+	this.copy = function(nf, nid){ // copy into potentially new Formula
 		//var n_id = this.id; 
 		if(isUndefined(nf)) {
 			nf = this.formula;
 		}
 		//if(nf === this.formula) n_id = this.new_id(1)[0];
-		var n = nf.add(this.HANDLE);
+		var n = nf.add(this.HANDLE, nid);
 		n._data = copyData(this._data);
 		n.children = copyData(this.children);
 		n.parent_id = this.parent_id;
@@ -393,7 +404,7 @@ var Node = function Node(f, handle){
 	 */
 	this.find = function(expr){
 		var f = this.formula;
-		return f.find(expr, this.ancestors());
+		return f.find(expr, this.descendants());
 	}
 	/**
 	 * get the position of the child with the id 'id'
@@ -405,44 +416,62 @@ var Node = function Node(f, handle){
 		}
 		return -1;
 	}
-	this.copy_subtree = function(nf, log){ //copy into potentially new tree, and log in tranformation
+
+	//copy into potentially new tree, and log in tranformation
+	//if copying into the same tree, all ids in the copy are fresh
+	//if copying into a new tree, all ids are kept the same
+	this.copy_subtree = function(nf, log){ 
 		var f = this.formula;
 		//console.log(f.print())
-		var anc = this.ancestors();
+		
+		//if(this === f.root()) {var desc = f.nodes;
+		//	console.log(desc, this.descendants())}
+		var desc = this.descendants();
 		var mappings = {};
 		var nodes = {};
-		//copy all elements
-		for(a in anc){
-			var el = anc[a].copy(nf);
-			//console.log("id check ",a,anc[a].id)
-			mappings[anc[a].id] = el.id;
-			if (!isUndefined(log)) log.map(anc[a].id, el.id);
+		//copy all elements and add them to the nodes list of nf
+		//console.log("before1", nf.nodes, mappings)
+		for(a in desc){
+			if(nf !== f) var el = desc[a].copy(nf, desc[a].id); //if copying into a new tree, make sure to keep the same ids
+			else var el = desc[a].copy(nf);
+		
+			//console.log("id check ",a,desc[a].id)
+			mappings[desc[a].id] = el.id;
+			if (!isUndefined(log)) log.map(desc[a].id, el.id);
 			nodes[el.id] = el;
+			//console.log("element",el.id, el, nodes[el.id])
 		}
-		if(this.id == f.root().id){
-			nf.set_root(mappings[this.id]);
-		}
-		//set relationships:
-		for(var nid in nodes){
-			var n = nodes[nid];
-			if(n.parent_id in mappings){
-				n.parent_id = mappings[n.parent_id];
-			}
-			else{
-				n.parent_id = -1;
-			}
-			n.foreach_child(function(child,i){
-				if(child.id in mappings){
-					n.children[i] = mappings[child.id];
-					//console.log("new id ", child.id)
+		//console.log(nf.nodes, mappings)
+		// if(this === f.root()){
+		// 	nf.set_root(mappings[this.id]);
+		// }
+
+		//set relationships (after mappings have been established):
+		if(nf === f){
+			for(var nid in nodes){
+				var n = nodes[nid];
+				if(n.parent_id in mappings){
+					n.parent_id = mappings[n.parent_id];
 				}
 				else{
-					n.children[i] = -1;
+					n.parent_id = -1;
+					//console.error("could not copy parent")
 				}
-			})
+				for (var i =0; i < n.children.length; i++){
+					if(n.children[i] in mappings){
+						n.children[i] = mappings[n.children[i]];
+						//console.log("new child id ", child.id, "to", mappings[child.id])
+					}
+					else{
+						n.children[i] = -1;
+						console.error("could not copy child")
+					}
+				}
+			}
 		}
-		//console.log(nodes[mappings[this.id]].parent_id)
+
 		return nodes[mappings[this.id]];
 	}
-	this.init(f,handle);
+
+	this.init(f,handle, nid);
 }

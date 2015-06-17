@@ -14,15 +14,15 @@ var Formula = function Formula(){
 	this.root = function(){
 		return this.get(this.root_id);
 	}
-	this.add = function(handle){
-		var node = new Node(this, handle);
+	this.add = function(handle, nid){
+		var node = new Node(this, handle, nid);
 		this.nodes[node.id] = node;
 		return node;
 	}
 	this.fresh_id = function(){
 		var id= this.ID;
 		this.ID++;
-		console.log("new id", id);
+		//console.log("new id", id);
 		return id;
 	}
 	this.get = function(id){
@@ -31,9 +31,13 @@ var Formula = function Formula(){
 	}
 	this.copy = function(){
 		var f = new Formula();
-		this.root().copy_subtree(f);
+		this.cleanup();
+		n_root = this.root().copy_subtree(f); // copy tree into f
+		//console.log("copy results", n_root, f.nodes);
+		f.ID = this.ID;
+		f.root_id = this.root_id;
 		if(this.print(true) !== f.print(true)){ 
-			console.error("COPYING FAILED:", this.print(), "to", f.print(true))
+			console.error("COPYING FAILED:", this.print(), this.nodes, "to", f.print(), f.nodes)
 			console.log(f)
 		}
 		return f;
@@ -66,7 +70,7 @@ var Formula = function Formula(){
 			}
 			else if(pred.startsWith("%%")){
 				var check_id = parseInt(pred.substring(2));
-				var anc = this.get(check_id).ancestors(this);
+				var anc = this.get(check_id).descendants(this);
 				var new_pred = function(comb,prev, anc){
 					return function(node){return comb( prev(node), node.id in anc) }
 				}(combine,predicates,anc);
@@ -115,9 +119,11 @@ var Formula = function Formula(){
 	this.toString = function(){
 		return JSON.stringify(this.nodes,null,2);
 	}
-	//set fl to anything to display levels with each node:
+	//set fl to true to display levels with each node:
 	this.print = function(fl){
-		return this.root().print(0,fl);
+		var str = this.root().print(0,fl);
+		if (fl) str += ('\n' + this.root().print(0,5.78));
+		return str;
 	}
 
 	//flatten the operations like mult or add:
@@ -161,7 +167,7 @@ var Formula = function Formula(){
 	//delete nodes not connected to tree, reassign ids (and log if transf is given)
 	//also flatten the tree:
 	this.cleanup_and_reassign = function(transf){
-		var tree = this.root().ancestors();
+		var tree = this.root().descendants();
 		var cnt = 0;
 		var mapping = {};
 		this.flatten();
@@ -196,7 +202,7 @@ var Formula = function Formula(){
 
 	//Delete any nodes not actually connected to the root:
 	this.cleanup = function(){
-		var tree = this.root().ancestors();
+		var tree = this.root().descendants();
 		//initialize to 0
 		for(var id in this.nodes){
 			if(! (id in tree)){

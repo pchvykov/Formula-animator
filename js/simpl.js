@@ -410,10 +410,9 @@ Transforms.Distribute = function Distribute(){
 		log.mark('paren',dest.id);
 		log.mark('top',src.id);
 		//distribute over dest;
-		var nc = src.copy_subtree(undefined, log); //and log the mappings
 		if(dest_op== "mult"){
 			dest.foreach_child(function(c,i){
-				
+				var nc = src.copy_subtree(form, log); //and log the mappings
 				mul.add_child_before(nc.id, c.id);
 				log.map(src.id, nc.id);
 			})
@@ -421,7 +420,7 @@ Transforms.Distribute = function Distribute(){
 		else if(dest_op == "sub" || dest_op == "plus"){
 			dest.foreach_child(function(c,i){
 				var mul = form.add("MULT");
-				
+				var nc = src.copy_subtree(form, log); //and log the mappings
 				//console.log("new node", nc)
 				//console.log(nc.print(0,true))
 

@@ -14,7 +14,7 @@ Equation = function(latex, paper, coord){
 	this.map = {}; //mapping between ids of the Rtree : ids of the master (this.map[Rid] = mid)
 	this.anim_t = 500; this.long_anim_t = 2500; //time in ms for the flow animation; long for nice one
 	//var cursor = this.Rcoord; //current cursor position
-	var debug = true; //flag to show some useful output
+	var debug = false; //flag to show some useful output
 
 	this.forEl = function(elfn, el) { //Execute the function for all elements in set (not sets)
 		if (isUndefined(el)) el = this.Rtree;
