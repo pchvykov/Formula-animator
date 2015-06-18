@@ -26,8 +26,7 @@ manip_gui = function(eq){
     var left = false;
     var exec = -1;
     var delay;
-    var temp_R;
-    //    form, delay, SVG, temp_R = Raphael(0,0,1,1),
+    var temp_eq;
     var cursor_now;
     var coord_hold =0;
 
@@ -59,8 +58,9 @@ manip_gui = function(eq){
         cursor_now = [x,y];
         //Delete the proposed manipulation if move mouse more than threshold:
         //console.log(coord_hold);
-        if(!isUndefined(temp_R) && Math.abs(cursor_now[0]-coord_hold[0])+Math.abs(cursor_now[1]-coord_hold[1]) >10){
-            temp_R.remove();
+        if(!isUndefined(temp_eq) && Math.abs(cursor_now[0]-coord_hold[0])+Math.abs(cursor_now[1]-coord_hold[1]) >10){
+            temp_eq.Rtree.remove();
+            eq.Rtree.attr({opacity:1});
         }
         // console.log(this.ox);
     }
@@ -77,11 +77,13 @@ manip_gui = function(eq){
             //wait for the user to stay there for a bit
             delay = setTimeout(function(){
                 //execute the proposed transformation:
-                var temp_eq = eq.copy();
+                temp_eq = eq.copy();
                 temp_eq.gui_fl = false;
-                temp_R = temp_eq.R;
                 var transf = temp_eq.distribute(holdid,dropid, eq.map);
-                temp_eq.flow_from(eq, transf);
+                if(transf){
+                    eq.Rtree.attr({opacity:0})
+                    temp_eq.flow_from(eq, transf);
+                }
                 coord_hold = cursor_now; //to determine when you move out again
             },500);
         };
@@ -105,12 +107,19 @@ manip_gui = function(eq){
             //console.log(holdid, dropid, left);
             var temp_form = eq.master.copy();
             var transf = eq.distribute(holdid,dropid);
+            if (!transf) {
+                eq.forEl(function(el) {
+                    el.attr({x: el.ox, y: el.oy})
+                }, this.parent);
+                return;
+            }
+            if(!isUndefined(temp_eq)) temp_eq.Rtree.remove();
             eq.display();            
-            if(!isUndefined(temp_R)) temp_R.remove();
+            
 
             //Create animation box---------------
             var new_form = eq.master.copy();
-            //add_op(temp_form, new_form, transf);
+            memory.add_op(temp_form, new_form, transf);
 
         }
         

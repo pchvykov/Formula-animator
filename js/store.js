@@ -15,59 +15,87 @@ get the id of top node of expression being distributed
 
 */
 
-//Array to store the operations:
-ops = new Array();
-var orig = [15,30]; step = 50; 
 
-//Execute on double-click
-//Draws the pre-transoformation formula, and animates the transformation
-var run_anim = function(){
-	this.attr({cursor: "default"})
-	var R = main_eq.R_form.paper;
-	R.clear();
-	var n=this.num;
-	//console.log(ops[n].old.print())
+//Class for a stored equation
+Operation = function(oldf, newf, transf, orig, memID, mem){
 
-	//Draw the original formula
-	var oldf = ops[n].oldf.copy();
-	var v = draw_it(oldf, main_eq.origin, true, R, main_eq.fontz);
-	//console.log(ops[n].oldf.print(true), "\n", ops[n].newf.print(true))
 
-    //sleep(1000);
-    document.getElementById('button').onclick = function() {
-    //console.log(110, n, ops[n].new)
-    // setTimeout(function())
-    	var newf = ops[n].newf.copy();
-	    v=flow_it(R, newf, ops[n].transf, true);
-	    R.remove();
-	    main_eq.R_form = v;
-	    n++;
+	//Execute on double-click
+	//Draws the pre-transoformation formula, and animates the transformation
+	var oper = this;
+	var run_anim = function(){
+		this.attr({cursor: "default"})
+
+		//Draw the original formula
+		var mID = this.memID;
+		eq0.master = oper.oldf.copy();
+		eq0.display();
+		//console.log(ops[n].oldf.print(true), "\n", ops[n].newf.print(true))
+
+	    //sleep(1000);
+	    document.getElementById('button').onclick = function() {
+	    //console.log(110, n, ops[n].new)
+	    // setTimeout(function())
+	    	oper = oper.mem.ops[mID];
+		    eq0.master = oper.oldf.copy();
+			eq0.display();
+
+	    	eq1 = eq0;
+	    	eq0 = eq1.copy();
+	    	eq0.master = oper.newf.copy();
+	    	//eq0.display();
+	    	eq1.Rtree.attr({opacity:0});
+		    eq0.animate_from(eq1, oper.transf);
+		    eq1.delete();
+
+		    mID++;
+		    
+		    
+		}
+
+		//make_room(SVG.getById(ops[n].transf.get('top')).parent, SVG.getById(ops[n].transf.get('paren')).parent,0);
+		//console.log('done animating')
+		// make_room(distributor,distributee,0);
 	}
 
-	//make_room(SVG.getById(ops[n].transf.get('top')).parent, SVG.getById(ops[n].transf.get('paren')).parent,0);
-	//console.log('done animating')
-	// make_room(distributor,distributee,0);
-}
-
-/**
-	 * store the manipulation in an array, and also in the side-bar
-	 * @param {tree} oldf - backend tree for the old formula
-	 * @param {tree} newf - backend tree for the new formula
-	 * @param {obj} transf - transformation object returned by rule.apply(..)
-	 */
-function add_op(oldf, newf, transf){
-	var op_num = ops.length;
-	ops.push(
-	{
-		'oldf':oldf,
-		'newf':newf,
-		'transf':transf
-	});
+	//Initialization:
+	/**
+		 * store the manipulation in an array, and also in the side-bar
+		 * @param {tree} oldf - backend tree for the old formula
+		 * @param {tree} newf - backend tree for the new formula
+		 * @param {obj} transf - transformation object returned by rule.apply(..)
+		 */
+	this.format = {fontz:15, spacing:3}; //formatting
+	this.oldf = oldf; //old master tree
+	this.newf = newf; //new tree
+	this.transf = transf; //the transformation
+	this.mem = mem; //parent memory class
+	this.origin = orig; //origin coordinates in the paper
+	this.memID = memID; //id of this element in the memory class
 
 	//Draw the side-panel functions
-	eq = draw_it(newf, [orig[0], orig[1]+ step*(op_num)], false, Mem, 15);
-	forEl(eq, function(el){el.num = op_num;});
-	eq.dblclick(run_anim)
+	this.eq = new Equation(oldf, mem.R, orig);
+	this.eq.format = this.format;
+	this.eq.gui_fl = false;
+	this.eq.display();
+	// var oper = this;
+	this.eq.forEl(function(el){el.memID = memID});
+	this.eq.Rtree.dblclick(run_anim)
+
+	//return this;
 }
 
 
+//Class for the entire memory box:
+Memory = function(paper){
+	this.step = 50;
+	this.R = paper;
+	this.ops = []; //array to store the operations
+
+	this.add_op = function(oldf, newf, transf){
+		var id = this.ops.length;
+		if(id>0) var orig = this.ops[id-1].origin;
+		else var orig = [30,10]
+		this.ops.push(new Operation(oldf, newf, transf, [orig[0], orig[1]+this.step], id, this));
+	}
+}

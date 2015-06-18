@@ -57,3 +57,10 @@ var countKeys = function(myobj){
 	for (k in myobj) if (myobj.hasOwnProperty(k)) count++;
 	return count;
 }
+
+function sleep(milliseconds) {
+  var start = new Date().getTime();
+    while ((new Date().getTime() - start) < milliseconds){
+        
+    }
+}
