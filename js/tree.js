@@ -31,7 +31,7 @@ var Formula = function Formula(){
 	}
 	this.copy = function(){
 		var f = new Formula();
-		this.cleanup();
+		//this.cleanup();
 		n_root = this.root().copy_subtree(f); // copy tree into f
 		//console.log("copy results", n_root, f.nodes);
 		f.ID = this.ID;

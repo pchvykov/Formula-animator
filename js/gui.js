@@ -59,11 +59,14 @@ manip_gui = function(eq){
         //Delete the proposed manipulation if move mouse more than threshold:
         //console.log(coord_hold);
         if(!isUndefined(temp_eq) && Math.abs(cursor_now[0]-coord_hold[0])+Math.abs(cursor_now[1]-coord_hold[1]) >10){
-            temp_eq.Rtree.remove();
+            temp_eq.delete();
+            temp_eq = undefined;
+            //console.log(temp_eq, "temp eq")
             eq.Rtree.attr({opacity:1});
         }
         // console.log(this.ox);
     }
+
 
     /**
          * executes on mouse-rollover
@@ -78,14 +81,13 @@ manip_gui = function(eq){
             delay = setTimeout(function(){
                 //execute the proposed transformation:
                 temp_eq = eq.copy();
-                temp_eq.gui_fl = false;
-                var transf = temp_eq.distribute(holdid,dropid, eq.map);
-                if(transf){
-                    eq.Rtree.attr({opacity:0})
-                    temp_eq.flow_from(eq, transf);
-                }
+                //if(gui_fl == false) temp_eq.gui_fl = false;
+                var transf = temp_eq.distribute(holdid,dropid);
+                if (! transf) {temp_eq = undefined; return;}
+                eq.Rtree.attr({opacity:0})
+                temp_eq.flow_from(eq, transf);
                 coord_hold = cursor_now; //to determine when you move out again
-            },500);
+            } , 500);
         };
         if(holdid == dropid){clearTimeout(delay);}
 
@@ -103,18 +105,35 @@ manip_gui = function(eq){
         }
         //else, update the formula:
         else{
-            clearTimeout(delay);
-            //console.log(holdid, dropid, left);
             var temp_form = eq.master.copy();
-            var transf = eq.distribute(holdid,dropid);
-            if (!transf) {
-                eq.forEl(function(el) {
-                    el.attr({x: el.ox, y: el.oy})
-                }, this.parent);
-                return;
+            if (isUndefined(temp_eq)){
+                clearTimeout(delay);
+                //execute the proposed transformation:
+                temp_eq = eq.copy();
+                //if(gui_fl == false) temp_eq.gui_fl = false;
+                var transf = temp_eq.distribute(holdid,dropid);
+                if (!transf) {
+                    temp_eq = undefined;
+                    eq.forEl(function(el) {
+                        el.attr({x: el.ox, y: el.oy})
+                    }, this.parent);
+                    return;
+                }
+                eq.Rtree.attr({opacity:0})
+                temp_eq.flow_from(eq, transf);
             }
-            if(!isUndefined(temp_eq)) temp_eq.Rtree.remove();
-            eq.display();            
+            eq.delete();
+            eq = temp_eq; 
+            eq0=eq;
+            //console.log(holdid, dropid, left);
+            //
+            //var transf = eq.distribute(holdid,dropid);
+            
+            //if(!isUndefined(temp_eq)) temp_eq.Rtree.remove();
+            //eq.display();            
+            // eq.Rtree.remove();
+            // eq = temp_eq;
+
             
 
             //Create animation box---------------

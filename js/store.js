@@ -17,7 +17,7 @@ get the id of top node of expression being distributed
 
 
 //Class for a stored equation
-Operation = function(oldf, newf, transf, orig, memID, mem){
+var Operation = function(oldf, newf, transf, orig, memID, mem){
 
 
 	//Execute on double-click
@@ -40,13 +40,17 @@ Operation = function(oldf, newf, transf, orig, memID, mem){
 		    eq0.master = oper.oldf.copy();
 			eq0.display();
 
-	    	eq1 = eq0;
-	    	eq0 = eq1.copy();
-	    	eq0.master = oper.newf.copy();
+	    	var eq1 = eq0.copy();
+	    	eq1.master = oper.newf.copy();
 	    	//eq0.display();
-	    	eq1.Rtree.attr({opacity:0});
-		    eq0.animate_from(eq1, oper.transf);
-		    eq1.delete();
+	    	eq0.Rtree.attr({opacity:0});
+		    eq1.animate_from(eq0, oper.transf);
+		    eq0.delete();
+		    eq0=eq1;
+		    //workaround since the gui isn't being setup correctly after the animation (some timing issue..)
+		    setTimeout(function(){eq0.display()}, eq0.long_anim_t+10); 
+		    //sleep(eq0.long_anim_t);
+		    //eq0.display();
 
 		    mID++;
 		    

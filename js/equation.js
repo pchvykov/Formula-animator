@@ -13,7 +13,7 @@ Equation = function(form, paper, coord){
 	//this.R.ID = 0;
 	this.R.canvas.style.backgroundColor = '#FFF';
 	this.map = {}; //mapping between ids of the Rtree : ids of the master (this.map[Rid] = mid)
-	this.anim_t = 500; this.long_anim_t = 2500; //time in ms for the flow animation; long for nice one
+	this.anim_t = 500; this.long_anim_t = 2000; //time in ms for the flow animation; long for nice one
 	//var cursor = this.Rcoord; //current cursor position
 	var debug = false; //flag to show some useful output
 
@@ -284,7 +284,7 @@ Equation = function(form, paper, coord){
 					var n = paths.length;
 					paths.push(p);
 					elt.attr({along: [n, 0]});
-					elt.animate({along: [n, 1]}, long_anim_t);  
+					elt.animate({along: [n, 1]}, long_anim_t, "<>");  
 					//animateAlong(elt, path, long_anim_t);
 				}
 				//Straight animation for everything not being distributed
@@ -331,6 +331,7 @@ Equation = function(form, paper, coord){
 		//f.R = new Raphael(this.R.canvas.parentElement);//, this.R.width, this.R.height);
 		//f.R.canvas.style.backgroundColor = this.R.canvas.style.backgroundColor;
 		f.R = this.R;
+		f.map = copyData(this.map);
 		//f.R.ID = 0;
 		f.anim_t = this.anim_t; f.long_anim_t = this.long_anim_t; //time in ms for the flow animation; long for nice one
 		f.gui_fl = this.gui_fl;
@@ -340,13 +341,13 @@ Equation = function(form, paper, coord){
 	}
 	
 	this.delete = function(){
-		this.Rtree.remove();
+		if(!isUndefined(this.Rtree)) this.Rtree.remove();
 		for(n in this.master.nodes) delete this.master.nodes[n];
 	}
 
-	this.distribute = function(holdid,dropid, map){
+	this.distribute = function(holdid,dropid){
 		//if(isUndefined(map) && isUndefined(this.Rtree)) this.make_Rtree();
-		if(!isUndefined(map)) this.map=copyData(map);
+		//if(!isUndefined(map)) this.map=copyData(map);
 		//backend transformation
         var rule = new Transforms.Distribute();
         var results= rule.find('src:'+this.map[holdid]+' dest:'+this.map[dropid], this.master)
