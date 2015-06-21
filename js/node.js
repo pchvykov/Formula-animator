@@ -1,3 +1,6 @@
+//this is the class for nodes of the master tree
+//handle most of the operations at this level
+
 /**
  * Create a class the nodes of the master tree
  * @constructor
@@ -128,6 +131,7 @@ var Node = function Node(f, handle, nid){
 	/**
 	 * remove the child at position j. 
 	 * @param {string} j - position of child to remove.
+	 * returns the orphaned child
 	 */
 	this.remove_child = function(j){
 		var f = this.formula;
@@ -145,6 +149,7 @@ var Node = function Node(f, handle, nid){
 	 * @constructor
 	 * @param {Formula} f - the formula to add the node to.
 	 * @param {String} handle - The type of node to add. Must be a key in NODES.
+	 * @param {int} nid - if want to force the id of the new element
 	 */
 	this.init = function(f,handle, nid){
 		var that = this;
@@ -179,6 +184,7 @@ var Node = function Node(f, handle, nid){
 		else {
 			if(nid in f.nodes) log.error("warning: overwriting an existing node!")
 			this.id = nid; 
+			f.ID = Math.max(nid+1, f.ID);
 		}
 		this.parent_id = -1;
 		this.children = [];
@@ -194,7 +200,7 @@ var Node = function Node(f, handle, nid){
 	this.replace = function(new_id){
 		var f = this.formula;
 		var par = this.parent();
-		if(par != null){
+		if(par != null && par != -1){
 			par.add_child_before(new_id, par.get_index(this.id));
 			par.remove_child(par.get_index(this.id));
 			f.get(new_id).parent_id = this.parent_id;
@@ -210,7 +216,7 @@ var Node = function Node(f, handle, nid){
 		return this;
 	}
 	/**
-	 * Remove the current node, replacing it with one of its child nodes. 
+	 * Remove the current node, replacing it with the passed in node 
 	 * @param {number} child_to_move up. If not defined, doesn't move up any children.
 	 */
 	this.remove = function(child_to_moveup){
@@ -348,6 +354,7 @@ var Node = function Node(f, handle, nid){
 	 * copy the current node, inserting it into the formula nf. If no formula
 	 * is provided, the formula the current node belongs to is used.
 	 * @param {Formula} f - Formula to add node to.
+	 * @param {int} nid - force the id of the new node to = nid
 	 */
 	this.copy = function(nf, nid){ // copy into potentially new Formula
 		//var n_id = this.id; 
@@ -420,6 +427,8 @@ var Node = function Node(f, handle, nid){
 	//copy into potentially new tree, and log in tranformation
 	//if copying into the same tree, all ids in the copy are fresh
 	//if copying into a new tree, all ids are kept the same
+	// nf - tree to copy into
+	// 
 	this.copy_subtree = function(nf, log){ 
 		var f = this.formula;
 		//console.log(f.print())
@@ -429,10 +438,11 @@ var Node = function Node(f, handle, nid){
 		var desc = this.descendants();
 		var mappings = {};
 		var nodes = {};
+		var keep_id = nf.isEmpty();
 		//copy all elements and add them to the nodes list of nf
 		//console.log("before1", nf.nodes, mappings)
 		for(a in desc){
-			if(nf !== f) var el = desc[a].copy(nf, desc[a].id); //if copying into a new tree, make sure to keep the same ids
+			if(keep_id) var el = desc[a].copy(nf, desc[a].id); //if copying into a new tree, make sure to keep the same ids
 			else var el = desc[a].copy(nf);
 		
 			//console.log("id check ",a,desc[a].id)
@@ -447,7 +457,7 @@ var Node = function Node(f, handle, nid){
 		// }
 
 		//set relationships (after mappings have been established):
-		if(nf === f){
+		if(!keep_id){
 			for(var nid in nodes){
 				var n = nodes[nid];
 				if(n.parent_id in mappings){

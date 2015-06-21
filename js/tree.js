@@ -1,9 +1,13 @@
+//this is the class for the master tree object
+//note that most of the operations are handled by the child node class
+
+
 var Formula = function Formula(){
 
 	this.init = function(){
-		this.nodes = {};
-		this.ID = 0;
-		this.root_id = -1;
+		this.nodes = {}; //all the nodes in the tree
+		this.ID = 0; //max id of any node in the tree (for adding new nodes)
+		this.root_id = -1; // id of root node
 	}
 	this.has = function(id){
 		return (id in this.nodes);
@@ -18,6 +22,9 @@ var Formula = function Formula(){
 		var node = new Node(this, handle, nid);
 		this.nodes[node.id] = node;
 		return node;
+	}
+	this.isEmpty = function(){
+		return (this.ID==0)
 	}
 	this.fresh_id = function(){
 		var id= this.ID;

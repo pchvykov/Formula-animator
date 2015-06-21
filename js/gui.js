@@ -8,7 +8,8 @@
 
 // document.onselectstart = function(){ return false; }
 
-
+//-----------------------
+//Set up the manipulation gui on the equation eq. 
 
 manip_gui = function(eq){
     /**
@@ -27,6 +28,7 @@ manip_gui = function(eq){
     var exec = -1;
     var delay;
     var temp_eq;
+    var transf;
     var cursor_now;
     var coord_hold =0;
 
@@ -82,7 +84,7 @@ manip_gui = function(eq){
                 //execute the proposed transformation:
                 temp_eq = eq.copy();
                 //if(gui_fl == false) temp_eq.gui_fl = false;
-                var transf = temp_eq.distribute(holdid,dropid);
+                transf = temp_eq.distribute(holdid,dropid);
                 if (! transf) {temp_eq = undefined; return;}
                 eq.Rtree.attr({opacity:0})
                 temp_eq.flow_from(eq, transf);
@@ -111,7 +113,7 @@ manip_gui = function(eq){
                 //execute the proposed transformation:
                 temp_eq = eq.copy();
                 //if(gui_fl == false) temp_eq.gui_fl = false;
-                var transf = temp_eq.distribute(holdid,dropid);
+                transf = temp_eq.distribute(holdid,dropid);
                 if (!transf) {
                     temp_eq = undefined;
                     eq.forEl(function(el) {
@@ -138,6 +140,7 @@ manip_gui = function(eq){
 
             //Create animation box---------------
             var new_form = eq.master.copy();
+            //console.log(transf, "trasf")
             memory.add_op(temp_form, new_form, transf);
 
         }

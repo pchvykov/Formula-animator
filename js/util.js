@@ -1,3 +1,5 @@
+//Additional utility functions
+
 function decimalToHexString(number)
 {
     if (number < 0)
@@ -8,6 +10,8 @@ function decimalToHexString(number)
     return number.toString(16).toUpperCase();
 }
 
+
+//need these for displaying greek letters correctly:
 var toUnicodeSequence = function(code){
 	var orig = code.match(/@([0-9]*)/g);
 	if(orig == null) return code;
@@ -37,12 +41,13 @@ var toUnicodeCharacter = function(code){
 	return code;
 }
 
+//Use this for copying javascript object {a: dat1, b: dat2 ... }
 var copyData = function(d){
   return JSON.parse(JSON.stringify(d,null,2));
 }
 
 var isUndefined = function(v){
-  return (v == undefined);
+  return (v === undefined);
 }
 
 if (typeof String.prototype.startsWith != 'function') {
@@ -58,6 +63,7 @@ var countKeys = function(myobj){
 	return count;
 }
 
+//force complete inaction for the give time
 function sleep(milliseconds) {
   var start = new Date().getTime();
     while ((new Date().getTime() - start) < milliseconds){

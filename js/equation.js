@@ -1,6 +1,6 @@
 //Class for the object formula, containing all the necessary properties:
 
-//note: currently Rtree is created each time right before use.
+//note: currently Rtree is created each time right before displaying (not when tree is created)
 
 
 Equation = function(form, paper, coord){

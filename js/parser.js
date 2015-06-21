@@ -13,6 +13,7 @@ var mock1 = {
 }
 
 //read up on http://en.wikipedia.org/wiki/Parsing_expression_grammar to get how this works
+//uses the grammar.peg to parse the latex string into mater tree
 Parser = function(){
 	//takes text, turns it into tree
 

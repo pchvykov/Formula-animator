@@ -1,4 +1,4 @@
-
+//Everything needed to apply the transformations on the master tree:
 
 ApplyResult = function(name){
 	this.init = function(name){
@@ -143,7 +143,7 @@ Transforms.MoveTerm.prototype = new Transform();
 
 
 
-
+//Evaluate constant expression:
 SimplifyConstantsSearchResults = function(){
 	this.data = {};
 	this.add = function(r,chl){
@@ -270,6 +270,7 @@ Transforms.SimplifyConstants = function SimplifyConstants(){
 }
 Transforms.SimplifyConstants.prototype = new Transform();
 
+//search for possible distribution transformations
 this.DistributeSearchResult = function(){
 	this.data = {};
 	this._len = 0;

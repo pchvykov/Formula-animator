@@ -17,6 +17,16 @@ get the id of top node of expression being distributed
 
 
 //Class for a stored equation
+
+	/**
+		 * store the manipulation in an array, and also in the side-bar
+		 * @param {tree} oldf - backend tree for the old formula
+		 * @param {tree} newf - backend tree for the new formula
+		 * @param {obj} transf - transformation object returned by rule.apply(..)
+		 * @param {Array} orig - origin coordinates [x, y] where to show the stored eq.
+		 * @param {int} memID - id for this operation in the memory box
+		 * @param {Memory} mem - pointer to the parent memory box
+		 */
 var Operation = function(oldf, newf, transf, orig, memID, mem){
 
 
@@ -44,6 +54,7 @@ var Operation = function(oldf, newf, transf, orig, memID, mem){
 	    	eq1.master = oper.newf.copy();
 	    	//eq0.display();
 	    	eq0.Rtree.attr({opacity:0});
+	    	//console.log(oper, oper.transf)
 		    eq1.animate_from(eq0, oper.transf);
 		    eq0.delete();
 		    eq0=eq1;
@@ -63,12 +74,6 @@ var Operation = function(oldf, newf, transf, orig, memID, mem){
 	}
 
 	//Initialization:
-	/**
-		 * store the manipulation in an array, and also in the side-bar
-		 * @param {tree} oldf - backend tree for the old formula
-		 * @param {tree} newf - backend tree for the new formula
-		 * @param {obj} transf - transformation object returned by rule.apply(..)
-		 */
 	this.format = {fontz:15, spacing:3}; //formatting
 	this.oldf = oldf; //old master tree
 	this.newf = newf; //new tree
@@ -92,7 +97,7 @@ var Operation = function(oldf, newf, transf, orig, memID, mem){
 
 //Class for the entire memory box:
 Memory = function(paper){
-	this.step = 50;
+	this.step = 50; // display spacing between consequtive operations
 	this.R = paper;
 	this.ops = []; //array to store the operations
 
