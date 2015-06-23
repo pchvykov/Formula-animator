@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="jsketch.js"></script>
+	<script src="jquery.sketchable.js"></script>
+	<title>Math sketch</title>
+    </head>
+    <body>
+	<h2>Sample recognition</h2>
+
+	<canvas id="math-sketch" with="500" height="500" style="border: 1px solid #000000;"></canvas>
+	<script>
+
+	$(document).ready(function() {
+		var BRUSH_SIZE = 2;
+
+		var _opt = {
+			graphics: {
+				firstPointSize: 0,
+				lineWidth: BRUSH_SIZE
+			},
+			events: {
+				mousedown: function(elem, data, evt) {
+
+				},
+				mouseup: function(){
+					$.ajax({
+						url: '/stroke',
+						contentType: 'application/json',
+						type: 'POST',
+						data: JSON.stringify(strokes),
+						success: function(data) {
+							console.log(data);
+						}
+					});
+				}
+			}
+		}
+
+		var _cnv = $('#math-sketch').sketchable(_opt);
+		var strokes = _cnv.sketchable('strokes');
+	 });
+	</script>
+    </body>
+</html>
