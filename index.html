@@ -1,49 +1,91 @@
-<head>
-<script src="lib/jquery-1.11.1.min.js"></script>
-<script src="lib/raphael.js"></script>
-<script src="lib/peg.0.8.0.js"></script>
-<script src="js/util.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<script src="lib/jquery-1.11.1.min.js"></script>
+		<script src="lib/jsketch.js"></script>
+		<script src="lib/jquery.sketchable.js"></script>
+		<script src="lib/raphael.js"></script>
+		<script src="lib/peg.0.8.0.js"></script>
+		<script src="js/util.js"></script>
 
-<script src="js/parser.js"></script>
-<script src="js/simpl.js"></script>
-<script src="js/equation.js"></script>
-<script src="js/gui.js"></script>
-<script src="js/node.js"></script>
-<script src="js/tree.js"></script>
-<!-- <script src="js/animate.js"></script> -->
-<!-- <script src="js/event.js"></script> -->
+		<script src="js/parser.js"></script>
+		<script src="js/simpl.js"></script>
+		<script src="js/equation.js"></script>
+		<script src="js/gui.js"></script>
+		<script src="js/node.js"></script>
+		<script src="js/tree.js"></script>
+		<!-- <script src="js/animate.js"></script> -->
+		<!-- <script src="js/event.js"></script> -->
 
-<script src="js/main.js"></script>
-<!-- <script src="js/mock.js"></script> -->
-<script src="js/store.js"></script>
+		<script src="js/main.js"></script>
+		<!-- <script src="js/mock.js"></script> -->
+		<script src="js/store.js"></script>
 
-<!-- <script src="js/animate_a_set_along_a_path.js"></script> -->
-<!-- <script src="js/make_room.js"></script> -->
+		<!-- <script src="js/animate_a_set_along_a_path.js"></script> -->
+		<!-- <script src="js/make_room.js"></script> -->
 
-
-
-
-	<style type="text/css">
-	            #canvas_container {
+		<style type="text/css">
+	        #canvas_container {
 	                width: 500px;
 	                border: 1px solid #aaa;
-	            }
-	</style>
-</head>
-
-<body>
-
-<input id="formula_latex" type="text" value="2*(x+y)*(a+(d+r)+g) = "></input>
-<!-- <input id="formula_latex" type="text" value="(2*(x+y)*a+2*(x+y)*(d+r)+2*(x+y)*g) = "></input> -->
-<input id="button" type="submit" name="button" value="Animate"/></input>
-<!-- <div id="formula_latex_debug"></div> -->
-<div style="background-color:white; border: 5px solid black;" id="formula_container">
-</div> 
+	        }
+		</style>
 
 
+		<title>Formular animator</title>
+	</head>
+	<body>
 
+		<div id="input-wrapper">
+			<!-- Sketch input in -->
+			<canvas id="math-sketch" width="550" height="200" style="border: 1px solid #000000;"></canvas>
+			<div id="input-left" style="height: 100px; width=100px; float: left; margin-right: 100px;">
+				<h2>Fomular animator</h2>
+				<input id="formula_latex" type="text" value="2*(x+y)*(a+(d+r)+g) = "></input>
+				<!-- <input id="formula_latex" type="text" value="(2*(x+y)*a+2*(x+y)*(d+r)+2*(x+y)*g) = "></input> -->
+				<input id="button" type="submit" name="button" value="Animate"/></input>
+				<p id="latex-display"></p>
+				<!-- <div id="formula_latex_debug"></div> -->
+			</div>
+		</div>
 
+		<div style="background-color:white; border: 5px solid black;" id="formula_container">
+		</div>
 
+		<script>
 
-</body>
+		$(document).ready(function() {
+			var BRUSH_SIZE = 2;
 
+			var _opt = {
+				graphics: {
+					firstPointSize: 0,
+					lineWidth: BRUSH_SIZE
+				},
+				events: {
+					mousedown: function(elem, data, evt) {
+
+					},
+					mouseup: function(){
+						$.ajax({
+							url: '/stroke',
+							contentType: 'application/json',
+							type: 'POST',
+							data: JSON.stringify(strokes),
+							success: function(data) {
+								$('#latex-display').html(JSON.parse(data).latex);
+								console.log(data);
+							}
+						});
+					}
+				}
+			}
+
+			var _cnv = $('#math-sketch').sketchable(_opt);
+			var strokes = _cnv.sketchable('strokes');
+		});
+		</script>
+	</body>
+</html>
