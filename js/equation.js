@@ -125,8 +125,8 @@ Equation = function(form, paper, coord){
 		//console.log(this.R)
 		this.Rtree.myEq=this;
 		visit_child(node, 0, this.Rtree);
-		if(debug) console.log("map: ", this.map);
-		if(this.gui_fl) manip_gui(this);
+		if(debug) console.log("map R:mast ", this.map);
+		// if(this.gui_fl) manip_gui(this);
 		//return;
 	}
 
@@ -172,6 +172,7 @@ Equation = function(form, paper, coord){
 		}
 
 		iterate(cbk,top,cursor);
+		if(this.gui_fl && isUndefined(cbk)) manip_gui(this);
 	}
 
 	//quick preview animation:
@@ -215,6 +216,7 @@ Equation = function(form, paper, coord){
 			}
 		}
 		this.display(flow_el);
+		if(this.gui_fl) setTimeout(function(){manip_gui(eq)}, eq.anim_t+10); 
 	}
 
 	//nice animation, also sets gui:
@@ -303,12 +305,13 @@ Equation = function(form, paper, coord){
 				{
 					opacity:0
 				});
-				var fade = Raphael.animation({opacity:1}, eq.anim_t);
-				elt.animate(fade.delay(long_anim_t-anim_t));
+				var fade = Raphael.animation({opacity:1}, long_anim_t*0.2);
+				elt.animate(fade.delay(long_anim_t*0.8));
 			}
 		}
 		this.display(anim_el);
-		if(this.gui_fl) manip_gui(this);
+		//sleep(long_anim_t+10);
+		if(this.gui_fl) setTimeout(function(){manip_gui(eq)}, eq.long_anim_t+10);
 	}
 
 
