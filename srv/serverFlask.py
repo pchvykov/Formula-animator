@@ -6,8 +6,8 @@ from flask import Flask, render_template, request, send_from_directory, redirect
 def get_directory(name):
     return os.path.abspath(os.path.join(os.path.dirname(__file__), '..', name))
 
-SESHAT_PATHS = ['/home/zim/dev/seshat/']
-TEMP_PATHS = ['/home/zim/dev/temp/']
+SESHAT_PATHS = ['/home/pchvykov/Documents/seshat/']
+TEMP_PATHS = ['/home/pchvykov/Documents/Formula-animator/tmp/']
 base_seshat = ''
 base_temp = ''
 
